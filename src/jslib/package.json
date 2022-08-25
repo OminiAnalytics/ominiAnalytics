@@ -2,8 +2,10 @@
     "name": "jslib",
     "version": "1.0.0",
     "description": "",
+    "private": true,
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "npx webpack --mode production --config webpack.config.js && npx minify dist/bundle.js > dist/bundle.min.js"
     },
     "keywords": [],
     "author": "",

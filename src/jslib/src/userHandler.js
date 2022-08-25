@@ -1,8 +1,8 @@
 /*
  * @Author: realbacon
  * @Date: 2022-08-25 11:30:12
- * @Last Modified by: mikey.zhaopeng
- * @Last Modified time: 2022-08-25 11:31:22
+ * @Last Modified by: realbacon
+ * @Last Modified time: 2022-08-25 14:42:31
  */
 
 /*
@@ -13,11 +13,14 @@ Endpoints:
 */
 
 // User class
-class User {
+export class User {
     constructor(api) {
         this.uid; // user id
         this.device = {
-            browser: undefined,
+            browser: {
+                name: undefined,
+                version: undefined,
+            },
             os: undefined,
             type: undefined,
         }; // device information
@@ -77,16 +80,24 @@ class User {
 
     getDeviceInfo() {
         // Get browser name from user agent string
-        const ua = navigator.userAgent;
-        var browser =
-            ua.match(
-                /(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i
-            )[1] || "unknown";
+        let uabrand = navigator.userAgentData.brands;
+        uabrand = uabrand.filter(
+            (brand) =>
+                brand.brand.indexOf("Brand") === -1 &&
+                brand.brand.indexOf("Chromium") === -1
+        )[0];
+        const browser = {
+            name: uabrand.brand,
+            version: uabrand.version,
+        };
+
         // Get os
         // @deprecated : navigator.platform
         var os = navigator.platform;
-        if (os.indexOf("Win") > -1) {
-            os = "Windows";
+        if (os.indexOf("Win32") > -1) {
+            os = "Windows 64-bit";
+        } else if (os.indexOf("Win16") > -1) {
+            os = "Windows 32-bit";
         } else if (os.indexOf("Mac") > -1) {
             os = "Mac";
         } else if (
@@ -113,8 +124,8 @@ class User {
         // Get device type
         const mobile = ["iPhone", "iPad", "Android", "BlackBerry"];
         const tablet = ["iPad"];
-        const desktop = ["Windows", "Mac", "Linux"];
-        const console = ["Nintendo", "PlayStation"];
+        const desktop = ["Windows 64-bit", "Mac", "Linux", "Windows 32-bit"];
+        const consoles = ["Nintendo", "PlayStation"];
         var type;
         if (mobile.includes(os)) {
             type = "mobile";
@@ -125,7 +136,7 @@ class User {
         if (desktop.includes(os)) {
             type = "desktop";
         }
-        if (console.includes(os)) {
+        if (consoles.includes(os)) {
             type = "console";
         }
         this.device = {

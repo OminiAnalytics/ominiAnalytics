@@ -2,10 +2,10 @@
  * @Author: realbacon
  * @Date: 2022-08-25 11:31:58
  * @Last Modified by: realbacon
- * @Last Modified time: 2022-08-25 11:32:29
+ * @Last Modified time: 2022-08-25 12:03:18
  */
 
-class ApiAsync {
+export class ApiAsync {
     constructor(url, apiKey) {
         this.url = url;
         this.key = apiKey;
@@ -52,7 +52,7 @@ class ApiAsync {
             // allow cors
             mode: "cors",
         });
-        const data = await response.json();
-        return data;
+        const rdata = await response.json();
+        return rdata;
     }
 }
