@@ -1,43 +1,48 @@
 mod api;
-mod db;
-use actix_web::{middleware::Logger, web, web::Data, App, HttpServer};
-use api::task::get_task;
-use db::postgres;
+use actix_web::{error, middleware::Logger, web, web::Data, App, HttpResponse, HttpServer};
+use api::task::{get_task, post_task};
+mod models;
+mod schema;
 use dotenv::dotenv;
 use std::env;
-mod config {
-    use serde::Deserialize;
-    #[derive(Debug, Default, Deserialize)]
-    pub struct EnvConfig {
-        pub host: String,
-        pub port: u16,
-        pub pg: deadpool_postgres::Config,
-    }
-}
-use crate::config::EnvConfig;
-use ::config::Config;
-use tokio_postgres::NoTls;
+
+#[macro_use]
+extern crate diesel;
+
+use diesel::r2d2::ConnectionManager;
+use diesel::PgConnection;
+use r2d2::{Pool, PooledConnection};
+
+pub type DBPool = Pool<ConnectionManager<PgConnection>>;
+pub type DBPooledConnection = PooledConnection<ConnectionManager<PgConnection>>;
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "debug");
     std::env::set_var("RUST_BACKTRACE", "1");
     dotenv().ok();
-    let config_ = Config::builder()
-        .add_source(::config::Environment::default())
-        .build()
-        .unwrap();
-    let config: EnvConfig = config_.try_deserialize().unwrap();
-    let pool = config.pg.create_pool(None, NoTls).unwrap();
-
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL");
+    let manager = ConnectionManager::<PgConnection>::new(database_url);
+    let pool = r2d2::Pool::builder()
+        .build(manager)
+        .expect("Failed to create pool");
     env_logger::init();
     HttpServer::new(move || {
         let logger = Logger::default();
         App::new()
             .app_data(web::Data::new(pool.clone()))
+            .app_data(web::JsonConfig::default().error_handler(|err, _| {
+                error::InternalError::from_response(
+                    err,
+                    HttpResponse::InternalServerError().body("Something went wrong"),
+                )
+                .into()
+            }))
             .wrap(logger)
             .service(get_task)
+            .service(post_task)
     })
-    .bind((config.host.clone(), config.port.clone()))?
+    .bind(env::var("SERVER_HOST").expect("SERVER_HOST"))?
     .run()
     .await
 }
