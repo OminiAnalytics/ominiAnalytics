@@ -38,15 +38,13 @@ CREATE TABLE IF NOT EXISTS omini_users (
     id uuid PRIMARY KEY NOT NULL,
     created_at double precision DEFAULT EXTRACT(EPOCH FROM NOW()) NOT NULL,
     updated_at double precision DEFAULT EXTRACT(EPOCH FROM NOW()) NOT NULL,
-    device_info jsonb NOT NULL,
-    lang varchar(10) NOT NULL,
-    os varchar(20) NOT NULL
+    device_info jsonb NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS omini_alive_messages (
     id uuid PRIMARY KEY NOT NULL,
     u_id uuid NOT NULL REFERENCES omini_users (id),
     created_at double precision DEFAULT EXTRACT(EPOCH FROM NOW()) NOT NULL,
-    mtyp varchar NOT NULL
+    mtype varchar NOT NULL
 );
 

@@ -2,9 +2,10 @@
  * @Author: realbacon
  * @Date: 2022-08-26 11:34:25
  * @Last Modified by: realbacon
- * @Last Modified time: 2022-08-26 11:57:37
+ * @Last Modified time: 2022-08-26 23:13:26
  */
-use crate::models::NewAliveMessage;
+
+// Actix web & co
 use actix_web::{
     error::ResponseError,
     get,
@@ -28,42 +29,44 @@ use crate::{DBPool, DBPooledConnection};
 use diesel::query_dsl::methods::{FilterDsl, OrderDsl};
 use diesel::result::Error;
 use diesel::{ExpressionMethods, RunQueryDsl};
-// Import models
-#[derive(Serialize, Deserialize)]
-pub struct ValidAliveMessage {
-    pub u_id: String,
-    pub date: i64,
-}
 
-#[derive(Serialize, Deserialize)]
-pub struct RequestResult {
-    pub success: bool,
-    pub message: String,
-    pub at: String,
-}
+// import data structure
+use super::structs::{SignalResult, ValidAliveMessage};
+use crate::models::NewAliveMessage;
+
+// DB
+use super::alive_db::insert_alive_message;
 
 #[post("/alive")]
-pub async fn is_alive(pool: Data<DBPool>, _alive_message: Json<ValidAliveMessage>) -> HttpResponse {
+pub async fn is_alive(pool: Data<DBPool>, alive_message: Json<ValidAliveMessage>) -> HttpResponse {
     let id = Uuid::new_v4();
+    let _u_id = Uuid::parse_str(&alive_message.u_id[..]);
+    let u_id: Uuid;
+    match _u_id {
+        Ok(o) => u_id = o,
+        Err(_) => {
+            return HttpResponse::BadRequest().json(SignalResult {
+                success: false,
+                at: Utc::now().to_rfc3339(),
+                message: "Invalid UID format".to_string(),
+            });
+        }
+    }
     let conn = pool.get().expect("CONNECTION_POOL_ERROR");
-    use crate::schema::omini_alive_messages;
     let new_alive_message = NewAliveMessage {
         id: id.clone(),
-        u_id: id.clone(),
+        u_id,
         mtype: "isalive".to_string(),
     };
 
-    let result = diesel::insert_into(omini_alive_messages::table)
-        .values(&new_alive_message)
-        .execute(&conn);
-
+    let result = insert_alive_message(&conn, &new_alive_message);
     match result {
-        Ok(_) => HttpResponse::Ok().json(RequestResult {
+        Ok(_) => HttpResponse::Ok().json(SignalResult {
             success: true,
             message: "Alive message sent".to_string(),
             at: Utc::now().naive_utc().to_string(),
         }),
-        Err(_) => HttpResponse::InternalServerError().json(RequestResult {
+        Err(_) => HttpResponse::InternalServerError().json(SignalResult {
             success: false,
             message: "Error while handling alive message".to_string(),
             at: Utc::now().naive_utc().to_string(),

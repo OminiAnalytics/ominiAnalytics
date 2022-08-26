@@ -3,7 +3,7 @@ table! {
         id -> Uuid,
         u_id -> Uuid,
         created_at -> Float8,
-        mtyp -> Varchar,
+        mtype -> Varchar,
     }
 }
 
@@ -13,8 +13,6 @@ table! {
         created_at -> Float8,
         updated_at -> Float8,
         device_info -> Jsonb,
-        lang -> Varchar,
-        os -> Varchar,
     }
 }
 

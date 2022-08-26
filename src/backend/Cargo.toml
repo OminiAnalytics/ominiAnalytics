@@ -14,7 +14,7 @@ log = "^0.4"
 strum_macros = "^0.24"
 strum = { version = "^0.24.1", features = ["derive"]}
 derive_more = "^0.99"
-diesel = { version = "1.4.4", features = ["postgres", "r2d2", "chrono", "uuid"] }
+diesel = { version = "1.4.4", features = ["postgres", "r2d2", "chrono", "uuid", "numeric","serde_json"] }
 uuid = { version = "^0.6", features = ["serde", "v4"] }
 dotenv = "0.15.0"
 r2d2 = "0.8.9"

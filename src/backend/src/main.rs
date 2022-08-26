@@ -1,12 +1,13 @@
 /*
  * @Author: realbacon
  * @Date: 2022-08-26 11:34:33
- * @Last Modified by:   realbacon
- * @Last Modified time: 2022-08-26 11:34:33
+ * @Last Modified by: realbacon
+ * @Last Modified time: 2022-08-26 18:32:57
  */
 mod api;
-use actix_web::{error, middleware::Logger, web, web::Data, App, HttpResponse, HttpServer};
-use api::alive::is_alive;
+use actix_web::{error, middleware::Logger, web, App, HttpResponse, HttpServer};
+use api::alive_api::is_alive;
+use api::uid_api::check_user;
 mod models;
 mod schema;
 use dotenv::dotenv;
@@ -46,6 +47,7 @@ async fn main() -> std::io::Result<()> {
             }))
             .wrap(logger)
             .service(is_alive)
+            .service(check_user)
     })
     .bind(env::var("SERVER_HOST").expect("SERVER_HOST"))?
     .run()
