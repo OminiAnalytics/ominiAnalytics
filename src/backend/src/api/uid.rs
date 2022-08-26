@@ -1,10 +1,9 @@
 /*
- * @Author: realbacon
- * @Date: 2022-08-26 11:34:25
+ * @Author: realbacon 
+ * @Date: 2022-08-26 11:34:18 
  * @Last Modified by: realbacon
- * @Last Modified time: 2022-08-26 11:57:37
+ * @Last Modified time: 2022-08-26 11:35:20
  */
-use crate::models::NewAliveMessage;
 use actix_web::{
     error::ResponseError,
     get,
@@ -17,7 +16,6 @@ use actix_web::{
 };
 use chrono::{NaiveDateTime, Utc};
 use derive_more::Display;
-use r2d2::PooledConnection;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use uuid::Uuid;
@@ -30,9 +28,9 @@ use diesel::result::Error;
 use diesel::{ExpressionMethods, RunQueryDsl};
 // Import models
 #[derive(Serialize, Deserialize)]
-pub struct ValidAliveMessage {
+pub struct ValidateUidMessage {
     pub u_id: String,
-    pub date: i64,
+    pub device
 }
 
 #[derive(Serialize, Deserialize)]
@@ -42,18 +40,18 @@ pub struct RequestResult {
     pub at: String,
 }
 
-#[post("/alive")]
+#[post("/uid")]
 pub async fn is_alive(pool: Data<DBPool>, _alive_message: Json<ValidAliveMessage>) -> HttpResponse {
     let id = Uuid::new_v4();
     let conn = pool.get().expect("CONNECTION_POOL_ERROR");
-    use crate::schema::omini_alive_messages;
+    use crate::schema::alive_messages;
     let new_alive_message = NewAliveMessage {
         id: id.clone(),
         u_id: id.clone(),
         mtype: "isalive".to_string(),
     };
 
-    let result = diesel::insert_into(omini_alive_messages::table)
+    let result = diesel::insert_into(alive_messages::table)
         .values(&new_alive_message)
         .execute(&conn);
 

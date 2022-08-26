@@ -1,3 +1,9 @@
+/*
+ * @Author: realbacon
+ * @Date: 2022-08-26 11:34:33
+ * @Last Modified by:   realbacon
+ * @Last Modified time: 2022-08-26 11:34:33
+ */
 mod api;
 use actix_web::{error, middleware::Logger, web, web::Data, App, HttpResponse, HttpServer};
 use api::alive::is_alive;

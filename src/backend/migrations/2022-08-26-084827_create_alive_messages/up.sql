@@ -1,5 +1,5 @@
 -- Your SQL goes here
-CREATE TABLE IF NOT EXISTS alive_messages
+CREATE TABLE IF NOT EXISTS omini_alive_messages
 (
     id         UUID PRIMARY KEY        NOT NULL,
     u_id       UUID NOT NULL,
