@@ -3,7 +3,7 @@ table! {
         id -> Uuid,
         u_id -> Uuid,
         created_at -> Float8,
-        mtype -> Varchar,
+        mtyp -> Varchar,
     }
 }
 
@@ -17,6 +17,8 @@ table! {
         os -> Varchar,
     }
 }
+
+joinable!(omini_alive_messages -> omini_users (u_id));
 
 allow_tables_to_appear_in_same_query!(
     omini_alive_messages,
