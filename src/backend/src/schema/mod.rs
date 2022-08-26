@@ -1,7 +1,8 @@
 table! {
-    tasks (id) {
-        id -> Int4,
-        name -> Varchar,
-        content -> Text,
+    alive_messages (id) {
+        id -> Uuid,
+        u_id -> Uuid,
+        created_at -> Float8,
+        mtype -> Varchar,
     }
 }

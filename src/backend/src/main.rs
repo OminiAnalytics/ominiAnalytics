@@ -1,6 +1,6 @@
 mod api;
 use actix_web::{error, middleware::Logger, web, web::Data, App, HttpResponse, HttpServer};
-use api::task::{get_task, post_task};
+use api::alive::is_alive;
 mod models;
 mod schema;
 use dotenv::dotenv;
@@ -39,8 +39,7 @@ async fn main() -> std::io::Result<()> {
                 .into()
             }))
             .wrap(logger)
-            .service(get_task)
-            .service(post_task)
+            .service(is_alive)
     })
     .bind(env::var("SERVER_HOST").expect("SERVER_HOST"))?
     .run()
