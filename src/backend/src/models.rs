@@ -16,7 +16,9 @@ use uuid::Uuid;
 pub struct NewAliveMessage {
     pub id: Uuid,
     pub u_id: Uuid,
+    pub s_id: Uuid,
     pub mtype: String,
+    pub s_duration: i32,
 }
 
 // diesel::sql_types::Uuid, Double, Double, diesel::sql_types::Jsonb
