@@ -23,7 +23,7 @@ pub struct Browser {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UserResult {
     pub uid: String,
-    pub at: String,
+    pub at: i64,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -42,5 +42,5 @@ pub struct ValidAliveMessage {
 pub struct SignalResult {
     pub success: bool,
     pub message: String,
-    pub at: String,
+    pub at: i64,
 }
