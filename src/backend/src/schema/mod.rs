@@ -2,16 +2,18 @@ table! {
     omini_alive_messages (id) {
         id -> Uuid,
         u_id -> Uuid,
-        created_at -> Float8,
+        s_id -> Uuid,
+        created_at -> Int8,
         mtype -> Varchar,
+        s_duration -> Int4,
     }
 }
 
 table! {
     omini_users (id) {
         id -> Uuid,
-        created_at -> Float8,
-        updated_at -> Float8,
+        created_at -> Int8,
+        updated_at -> Int8,
         device_info -> Jsonb,
     }
 }
