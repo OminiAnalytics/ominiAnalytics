@@ -1,8 +1,8 @@
 /*
  * @Author: realbacon
- * @Date: 2022-08-26 18:29:24
- * @Last Modified by: realbacon
- * @Last Modified time: 2022-08-26 23:35:08
+ * @Date: 2022-08-27 21:07:39
+ * @Last Modified by:   realbacon
+ * @Last Modified time: 2022-08-27 21:07:39
  */
 
 // Diesel stuff
@@ -14,9 +14,9 @@ use diesel::{ExpressionMethods, RunQueryDsl};
 use uuid::Uuid;
 
 // Data structure
-use crate::models::GetUser;
+use crate::models::{GetUser, NewUser};
 
-pub fn is_uid_valid(conn: &DBPooledConnection, uid: Uuid, device: serde_json::Value) -> bool {
+pub fn is_uid_valid(conn: &DBPooledConnection, uid: Uuid, device: &serde_json::Value) -> bool {
     use crate::schema::omini_users::dsl::*;
     let result = omini_users
         .filter(id.eq(uid))
@@ -28,4 +28,19 @@ pub fn is_uid_valid(conn: &DBPooledConnection, uid: Uuid, device: serde_json::Va
     } else {
         return false;
     }
+}
+
+pub fn insert_user(
+    conn: &DBPooledConnection,
+    device: serde_json::Value,
+) -> Result<(Uuid, i64, i64, serde_json::Value), diesel::result::Error> {
+    use crate::schema::omini_users::dsl::*;
+    let uid = Uuid::new_v4();
+    let new_user = NewUser {
+        id: uid,
+        device_info: device,
+    };
+    diesel::insert_into(omini_users)
+        .values(&new_user)
+        .get_result(conn)
 }
