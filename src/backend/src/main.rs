@@ -5,9 +5,9 @@
  * @Last Modified time: 2022-08-26 18:32:57
  */
 mod api;
-use actix_web::{error, middleware::Logger, web, App, HttpResponse, HttpServer};
+use actix_web::{error, guard, middleware::Logger, web, App, HttpResponse, HttpServer};
 use api::alive_api::is_alive;
-use api::uid_api::check_user;
+use api::uid_api::check_user_or_create;
 mod models;
 mod schema;
 use dotenv::dotenv;
@@ -37,6 +37,12 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         let logger = Logger::default();
         App::new()
+            .service(
+                web::scope("/api")
+                    .guard(guard::Header("content-type", "application/json"))
+                    .service(is_alive)
+                    .service(check_user_or_create),
+            )
             .app_data(web::Data::new(pool.clone()))
             .app_data(web::JsonConfig::default().error_handler(|err, _| {
                 error::InternalError::from_response(
@@ -46,10 +52,8 @@ async fn main() -> std::io::Result<()> {
                 .into()
             }))
             .wrap(logger)
-            .service(is_alive)
-            .service(check_user)
     })
-    .bind(env::var("SERVER_HOST").expect("SERVER_HOST"))?
+    .bind(env::var("SERVER_HOST").expect("SERVER_HOST not present in env"))?
     .run()
     .await
 }
