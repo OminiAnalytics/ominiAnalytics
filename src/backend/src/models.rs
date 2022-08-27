@@ -6,7 +6,6 @@
  */
 use crate::schema::*;
 
-use diesel::pg::types::sql_types::Jsonb;
 use diesel::{Insertable, Queryable};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
