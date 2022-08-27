@@ -24,7 +24,14 @@ pub struct NewAliveMessage {
 #[derive(Queryable, Debug, Serialize, Deserialize)]
 pub struct GetUser {
     pub id: Uuid,
-    pub created_at: f64,
-    pub updated_at: f64,
+    pub created_at: i64,
+    pub updated_at: i64,
+    pub device_info: serde_json::Value,
+}
+
+#[derive(Insertable, Debug, Serialize, Deserialize)]
+#[table_name = "omini_users"]
+pub struct NewUser {
+    pub id: Uuid,
     pub device_info: serde_json::Value,
 }
