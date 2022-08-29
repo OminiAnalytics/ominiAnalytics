@@ -1,9 +1,15 @@
 /*
- * @Author: realbacon
- * @Date: 2022-08-26 11:34:25
- * @Last Modified by: realbacon
- * @Last Modified time: 2022-08-27 00:22:40
- */
+ File: alive_api.rs
+ Created Date: 27 Aug 2022
+ Author: realbacon
+ -----
+ Last Modified: 29/08/2022 01:31:15
+ Modified By: realbacon
+ -----
+ Copyright (c) 2022 Omini
+ -----
+*/
+
 
 // Actix web & co
 use actix_web::{post, web::Data, web::Json, HttpResponse};
