@@ -1,9 +1,16 @@
 /*
- * @Author: realbacon
- * @Date: 2022-08-26 11:34:42
- * @Last Modified by: realbacon
- * @Last Modified time: 2022-08-27 00:10:36
- */
+ File: models.rs
+ Created Date: 29 Aug 2022
+ Author: realbacon
+ -----
+ Last Modified: 29/08/2022 01:31:27
+ Modified By: realbacon
+ -----
+ Copyright (c) 2022 Omini
+ -----
+*/
+
+
 use crate::schema::*;
 
 use diesel::{Insertable, Queryable};
@@ -27,6 +34,7 @@ pub struct GetUser {
     pub created_at: i64,
     pub updated_at: i64,
     pub device_info: serde_json::Value,
+    pub country: String,
 }
 
 #[derive(Insertable, Debug, Serialize, Deserialize)]
@@ -34,4 +42,5 @@ pub struct GetUser {
 pub struct NewUser {
     pub id: Uuid,
     pub device_info: serde_json::Value,
+    pub country: String,
 }
