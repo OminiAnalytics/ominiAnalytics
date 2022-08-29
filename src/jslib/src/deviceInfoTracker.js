@@ -10,6 +10,24 @@
  * -----
  */
 
+export class deviceInfo {
+    constructor() {
+        this.browser = {
+            name: undefined,
+            version: undefined,
+        };
+        this.os = {
+            name: undefined,
+            version: undefined,
+        };
+        this.type = undefined;
+    }
+
+    async initTracker() {
+        this.browser = this.getBrowser();
+        [this.os, this.type] = await this.getOsAndTypeExp();
+    }
+
     getBrowser() {
         if (navigator.userAgentData != undefined) {
             let fbrands = navigator.userAgentData.brands.filter(
