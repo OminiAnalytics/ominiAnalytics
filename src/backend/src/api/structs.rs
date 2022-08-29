@@ -1,17 +1,29 @@
 /*
- * @Author: realbacon
- * @Date: 2022-08-26 18:02:38
- * @Last Modified by: realbacon
- * @Last Modified time: 2022-08-26 18:03:38
- */
+ File: structs.rs
+ Created Date: 28 Aug 2022
+ Author: realbacon
+ -----
+ Last Modified: 29/08/2022 02:32:6
+ Modified By: realbacon
+ -----
+ Copyright (c) 2022 Omini
+ -----
+*/
+
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DeviceInfo {
     pub browser: Browser,
-    pub os: String,
-    pub lang: String,
+    pub os: Os,
+    pub dtype: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Os {
+    pub name: String,
+    pub version: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -28,8 +40,9 @@ pub struct UserResult {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct ValidUidMessage {
-    pub uid: Uuid,
+    pub uid: String,
     pub device: DeviceInfo,
+    pub country: String,
 }
 
 #[derive(Serialize, Deserialize)]
