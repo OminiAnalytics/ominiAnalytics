@@ -15,6 +15,7 @@ table! {
         created_at -> Int8,
         updated_at -> Int8,
         device_info -> Jsonb,
+        country -> Varchar,
     }
 }
 
