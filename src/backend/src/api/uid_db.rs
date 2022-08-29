@@ -32,13 +32,15 @@ pub fn is_uid_valid(conn: &DBPooledConnection, uid: Uuid, device: &serde_json::V
 
 pub fn insert_user(
     conn: &DBPooledConnection,
-    device: serde_json::Value,
-) -> Result<(Uuid, i64, i64, serde_json::Value), diesel::result::Error> {
+    dev: serde_json::Value, // device_info
+    cou: &String,           // country
+) -> Result<(Uuid, i64, i64, serde_json::Value, String), diesel::result::Error> {
     use crate::schema::omini_users::dsl::*;
     let uid = Uuid::new_v4();
     let new_user = NewUser {
         id: uid,
-        device_info: device,
+        device_info: dev,
+        country: cou.to_string(),
     };
     diesel::insert_into(omini_users)
         .values(&new_user)
