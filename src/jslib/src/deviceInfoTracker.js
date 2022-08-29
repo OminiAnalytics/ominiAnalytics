@@ -9,3 +9,30 @@
  * Copyright (c) 2022 Omini
  * -----
  */
+
+    getBrowser() {
+        if (navigator.userAgentData != undefined) {
+            let fbrands = navigator.userAgentData.brands.filter(
+                (brand) =>
+                    brand.brand.indexOf("Brand") === -1 &&
+                    brand.brand.indexOf("Chromium") === -1
+            )[0];
+            return {
+                name: fbrands.brand,
+                version: fbrands.version,
+            };
+        }
+        let browser = navigator.userAgent.match(
+            /(Firefox|Safari|Edge|Chrome)\/([\S]+)/i
+        );
+        if (navigator.brave && navigator.brave.isBrave()) {
+            var name = "Brave";
+        } else {
+            var name = browser[0];
+        }
+        let version = browser[1].split(".")[0];
+        return {
+            name,
+            version,
+        };
+    }
