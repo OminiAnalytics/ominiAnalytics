@@ -107,3 +107,72 @@
                     /\b(Android|Windows Phone|iPad|iPod)\b/i.test(UA);
             }
         }
+
+        // Get os
+        // @deprecated : navigator.platform
+        var version = "unknown";
+        var name = navigator.platform;
+        if (name.indexOf("Win") > -1) {
+            name = "Windows";
+        } else if (name.indexOf("Mac") > -1 || name.indexOf("iP") > -1) {
+            name = navigator.platform;
+        } else if (
+            name.indexOf("Android") > -1 ||
+            name.indexOf("Linux armv7l") > -1
+        ) {
+            name = "Android";
+        } else if (name.indexOf("Linux") > -1) {
+            name = "Linux";
+        } else if (name.indexOf("Nintendo") > -1) {
+            name = "Nintendo";
+        } else if (name.indexOf("PlayStation") > -1) {
+            name = "PlayStation";
+        } else if (name.indexOf("BlackBerry") > -1) {
+            name = "BlackBerry";
+        } else if (name.indexOf("BlackBerry") > -1) {
+            name = "BlackBerry";
+        } else {
+            name = "unknown";
+        }
+
+        // Try to get os version
+        if (ua && type === "desktop") {
+            // Try to get os version from oscpu for windows
+            if (ua.indexOf("Windows") > -1) {
+                if (ua.indexOf("NT 10.0") > -1) {
+                    version = "10";
+                } else if (ua.indexOf("NT 13") > -1) {
+                    version = "11";
+                } else {
+                    version = "8.1 or lower";
+                }
+            } else if (ua.indexOf("Mac")) {
+                if (ua.match("(OS X 10_10)|(OS X 10.10)")) {
+                    version = "10.10";
+                } else if (ua.match("(OS X 10_9)|(OS X 10.9)")) {
+                    version = "10.9";
+                } else if (ua.match("(OS X 10_8)|(OS X 10.8)")) {
+                    version = "10.8";
+                } else if (ua.match("(OS X 10_7)|(OS X 10.7)")) {
+                    version = "10.7";
+                }
+            }
+        } else if (
+            ua &&
+            type === "mobile" &&
+            ["iPhone", "iPad", "iPod"].includes(name)
+        ) {
+            version = String(
+                ua
+                    .match(/OS (\d)?\d_\d(_\d)?/i)[0]
+                    .replace(/_/g, ".")
+                    .replace("OS ", "")
+            );
+        }
+        var os = {
+            name,
+            version,
+        };
+        return [os, type];
+    }
+}
