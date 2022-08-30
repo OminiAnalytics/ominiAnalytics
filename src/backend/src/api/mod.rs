@@ -1,12 +1,18 @@
 /*
- * @Author: realbacon
- * @Date: 2022-08-26 11:34:38
- * @Last Modified by: realbacon
- * @Last Modified time: 2022-08-26 23:39:45
- */
-pub mod alive_api;
-mod alive_db;
+ File: mod.rs
+ Created Date: 25 Aug 2022
+ Author: realbacon
+ -----
+ Last Modified: 30/08/2022 09:55:29
+ Modified By: realbacon
+ -----
+ License  : MIT
+ -----
+*/
+
+
+pub mod alive;
 mod constants;
+pub mod main;
+pub mod security;
 pub mod structs;
-pub mod uid_api;
-mod uid_db;
