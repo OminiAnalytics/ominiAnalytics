@@ -39,7 +39,8 @@ CREATE TABLE IF NOT EXISTS omini_users (
     created_at bigint DEFAULT EXTRACT(EPOCH FROM NOW()) NOT NULL,
     updated_at bigint DEFAULT EXTRACT(EPOCH FROM NOW()) NOT NULL,
     device_info jsonb NOT NULL,
-    country varchar(20) NOT NULL
+    country varchar(20) NOT NULL,
+    ip VARCHAR(45) NOT NULL,
 );
 
 CREATE TABLE IF NOT EXISTS omini_alive_messages (

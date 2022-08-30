@@ -1,12 +1,12 @@
 /*
  File: models.rs
- Created Date: 29 Aug 2022
+ Created Date: 30 Aug 2022
  Author: realbacon
  -----
- Last Modified: 29/08/2022 01:31:27
+ Last Modified: 30/08/2022 09:58:14
  Modified By: realbacon
  -----
- Copyright (c) 2022 Omini
+ License  : MIT
  -----
 */
 
@@ -16,6 +16,9 @@ use crate::schema::*;
 use diesel::{Insertable, Queryable};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+extern crate diesel;
+#[macro_use]
+mod diesel;
 
 #[derive(Insertable)]
 #[table_name = "omini_alive_messages"]
@@ -27,7 +30,6 @@ pub struct NewAliveMessage {
     pub s_duration: i32,
 }
 
-// diesel::sql_types::Uuid, Double, Double, diesel::sql_types::Jsonb
 #[derive(Queryable, Debug, Serialize, Deserialize)]
 pub struct GetUser {
     pub id: Uuid,
@@ -35,12 +37,15 @@ pub struct GetUser {
     pub updated_at: i64,
     pub device_info: serde_json::Value,
     pub country: String,
+    pub ip: String,
 }
 
 #[derive(Insertable, Debug, Serialize, Deserialize)]
 #[table_name = "omini_users"]
 pub struct NewUser {
+    #[sql_type = "SomeType"]
     pub id: Uuid,
     pub device_info: serde_json::Value,
     pub country: String,
+    pub ip: String,
 }
