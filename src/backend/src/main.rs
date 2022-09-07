@@ -21,21 +21,37 @@ use api::alive::endpoint::is_alive;
 use api::main::endpoint::main_procedure_handler;
 mod config;
 mod models;
-mod schema;
 use dotenv::dotenv;
 use std::env;
+use tokio_postgres::NoTls;
 
-#[macro_use]
-extern crate diesel;
+pub mod db {
+    use deadpool_postgres::{Client, ManagerConfig, Pool, RecyclingMethod};
+    // Helper function to read environment variable
+
+    pub fn get_db_config() -> deadpool_postgres::Config {
+        use dotenv::dotenv;
+        use std::env;
+        dotenv().ok();
+        let mut config = deadpool_postgres::Config::new();
+        config.user = Some(env::var("DB_USER").expect("DB_USER not set"));
+        config.password = Some(env::var("DB_PASSWORD").expect("DB_PASSWORD set"));
+        config.dbname = Some(env::var("DB_NAME").expect("DB_NAME not set"));
+        config.host = Some(env::var("DB_HOST").expect("DB_USER net set"));
+
+        config.manager = Some(ManagerConfig {
+            recycling_method: RecyclingMethod::Fast,
+        });
+
+        config
+    }
+
+    pub async fn get_connection(pool: &Pool) -> Result<Client, String> {
+        pool.get().await.map_err(|err| err.to_string())
+    }
+}
 
 extern crate tokio;
-
-use diesel::r2d2::ConnectionManager;
-use diesel::PgConnection;
-use r2d2::{Pool, PooledConnection};
-
-pub type DBPool = Pool<ConnectionManager<PgConnection>>;
-pub type DBPooledConnection = PooledConnection<ConnectionManager<PgConnection>>;
 
 #[tokio::main(flavor = "multi_thread")]
 async fn main() -> std::io::Result<()> {
@@ -43,11 +59,7 @@ async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_BACKTRACE", "1");
     dotenv().ok();
 
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL");
-    let manager = ConnectionManager::<PgConnection>::new(database_url);
-    let pool = r2d2::Pool::builder()
-        .build(manager)
-        .expect("Failed to create pool");
+    let pool = db::get_db_config().create_pool(None, NoTls).unwrap();
 
     env_logger::init();
 
