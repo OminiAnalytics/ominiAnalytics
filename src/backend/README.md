@@ -21,7 +21,7 @@
     cargo install diesel_cli --no-default-features --features postgres
     ```
     Troubleshooting :
-    Look at [this link](https://github.com/diesel-rs/diesel/issues/2026#issuecomment-479716695) and [this one](https://github.com/diesel-rs/diesel/issues/2026#issuecomment-1126615465)
+    Look at [this link](https://github.com/diesel-rs/diesel/issues/2026#issuecomment-479716695) or [this one](https://github.com/diesel-rs/diesel/issues/2026#issuecomment-1126615465)
 
 ### Init Database
 
@@ -55,6 +55,11 @@ This example assumes you are using `your_password` as the password for the datab
     ```
     DATABASE_URL=postgres://omini_user:your_password@localhost/omini_db
     SERVER_HOST=0.0.0.0:5000
+    DB_NAME = 'omini_db'
+    DB_USER = 'omini_user'
+    DB_PASSWORD = 'your_password'
+    DB_HOST = 'localhost'
+    DB_PORT = '5432'
     ```
 
 5.  Grand necessary permissions for the user `omini_user`
@@ -68,3 +73,6 @@ This example assumes you are using `your_password` as the password for the datab
     ```bash
     diesel migration run
     ```
+
+    Run this command to update database on new version.
+    Be carefull using `diesel migration redo` or `diesel migration revert` as it will delete your data.
