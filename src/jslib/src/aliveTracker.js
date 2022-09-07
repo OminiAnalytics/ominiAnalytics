@@ -1,11 +1,11 @@
-/*
- * File: alivesignal.js
- * Created Date: Su Aug yyyy
+/**
+ * File: aliveTracker.js
+ * Created Date: 30 Aug 2022
  * Author: realbacon
  * -----
- * Last Modified: 28/08/2022 10:04:26
+ * Last Modified: 7/09/2022 07:46:18
  * Modified By: realbacon
  * -----
- * Copyright (c) 2022 Omini
+ * @license MIT
  * -----
- */
+ **/
