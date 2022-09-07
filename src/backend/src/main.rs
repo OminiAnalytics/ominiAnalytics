@@ -3,14 +3,12 @@
  Created Date: 25 Aug 2022
  Author: realbacon
  -----
- Last Modified: 30/08/2022 09:57:55
+ Last Modified: 7/09/2022 10:45:57
  Modified By: realbacon
  -----
  License  : MIT
  -----
 */
-
-
 
 mod api;
 use actix_cors::Cors;
@@ -19,7 +17,6 @@ use actix_web::{
 };
 use api::alive::endpoint::is_alive;
 use api::main::endpoint::main_procedure_handler;
-mod config;
 mod models;
 use dotenv::dotenv;
 use std::env;
@@ -94,6 +91,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(logger)
             .wrap(cors)
     })
+    .workers(1)
     .bind(env::var("SERVER_HOST").expect("SERVER_HOST not present in env"))?
     .run()
     .await?;
