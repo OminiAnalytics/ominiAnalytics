@@ -1,1 +1,3 @@
 test/*.html
+private.pem
+public.pem
