@@ -1,9 +1,9 @@
 /**
- * File: generator.js
+ * File: collector.js
  * Created Date: 04 Sep 2022
  * Author: realbacon
  * -----
- * Last Modified: 7/09/2022 09:52:37
+ * Last Modified: 7/09/2022 10:40:8
  * Modified By: realbacon
  * -----
  * @license MIT
@@ -18,10 +18,7 @@ import { ominiBrowser } from './browser.js'
 import { ominiOs } from './opersys.js'
 import { ominiLocation } from './location.js'
 
-export const ominiGenerator = {
-  /**
-   * Calculate the hash of the device
-   */
+export const ominiCollector = {
   /*
     Each trackable element has an importance level.
     The importance level is used to calculate the weight of each element.
