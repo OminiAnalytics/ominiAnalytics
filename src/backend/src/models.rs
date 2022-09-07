@@ -3,25 +3,19 @@
  Created Date: 30 Aug 2022
  Author: realbacon
  -----
- Last Modified: 30/08/2022 09:58:14
+ Last Modified: 31/08/2022 07:42:25
  Modified By: realbacon
  -----
  License  : MIT
  -----
 */
 
-
-use crate::schema::*;
-
-use diesel::{Insertable, Queryable};
 use serde::{Deserialize, Serialize};
+use tokio_pg_mapper_derive::PostgresMapper;
 use uuid::Uuid;
-extern crate diesel;
-#[macro_use]
-mod diesel;
 
-#[derive(Insertable)]
-#[table_name = "omini_alive_messages"]
+#[derive(PostgresMapper)]
+#[pg_mapper(table = "omini_alive_messages")]
 pub struct NewAliveMessage {
     pub id: Uuid,
     pub u_id: Uuid,
@@ -30,7 +24,8 @@ pub struct NewAliveMessage {
     pub s_duration: i32,
 }
 
-#[derive(Queryable, Debug, Serialize, Deserialize)]
+#[derive(PostgresMapper, Debug, Serialize, Deserialize)]
+#[pg_mapper(table = "omini_users")]
 pub struct GetUser {
     pub id: Uuid,
     pub created_at: i64,
@@ -40,10 +35,9 @@ pub struct GetUser {
     pub ip: String,
 }
 
-#[derive(Insertable, Debug, Serialize, Deserialize)]
-#[table_name = "omini_users"]
+#[derive(PostgresMapper, Debug, Serialize, Deserialize)]
+#[pg_mapper(table = "omini_users")]
 pub struct NewUser {
-    #[sql_type = "SomeType"]
     pub id: Uuid,
     pub device_info: serde_json::Value,
     pub country: String,
