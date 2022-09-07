@@ -3,14 +3,14 @@
  Created Date: 30 Aug 2022
  Author: realbacon
  -----
- Last Modified: 30/08/2022 09:56:11
+ Last Modified: 31/08/2022 08:57:4
  Modified By: realbacon
  -----
  License  : MIT
  -----
 */
 
-
+/*
 use crate::models::NewAliveMessage;
 use crate::schema::omini_alive_messages;
 use crate::schema::omini_alive_messages::dsl::*;
@@ -37,3 +37,5 @@ pub fn get_last_signal(
         .select((created_at, s_id, s_duration))
         .first(conn)
 }
+
+*/
