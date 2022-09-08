@@ -3,7 +3,7 @@
  * Created Date: 02 Sep 2022
  * Author: realbacon
  * -----
- * Last Modified: 7/09/2022 07:55:8
+ * Last Modified: 8/09/2022 08:48:35
  * Modified By: realbacon
  * -----
  * @license MIT
@@ -71,7 +71,7 @@ export const ominiHardware = {
    * // [1920, 1080,24]
    **/
   getScreen: function () {
-    return [screen.width, screen.height, screen.colorDepth]
+    return [screen.width || 0, screen.height || 0, screen.colorDepth || 0]
   },
   /**
    * Wrap the hardware information
