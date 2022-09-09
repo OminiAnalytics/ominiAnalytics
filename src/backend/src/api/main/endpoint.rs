@@ -3,97 +3,127 @@
  Created Date: 30 Aug 2022
  Author: realbacon
  -----
- Last Modified: 30/08/2022 09:55:10
+ Last Modified: 10/09/2022 12:00:2
  Modified By: realbacon
  -----
  License  : MIT
  -----
 */
 
+use std::net::{IpAddr};
 
-
-
-
-
-
-use actix_web::{post, web::Data, web::Json, HttpRequest, HttpResponse, ResponseError};
-use derive_more::Display;
+use actix_web::web;
+use actix_web::{post, web::Data, web::Json, HttpRequest, HttpResponse};
+use deadpool_postgres::Pool;
 // Import data structure
-use crate::api::structs::NewInst;
-use crate::DBPool;
-use uuid::Uuid;
+use super::crypto;
+use super::device::Device;
+use crate::api::custom::errors::HandlerError;
+use crate::api::custom::structs::NewInst;
+use crate::api::security;
+use serde::Serialize;
 
 // Db
-use super::db::{insert_user, user_exists};
+use super::db::{user_exists,insert_user};
 
 #[post("/main")]
 pub async fn main_procedure_handler(
     req: HttpRequest,
-    pool: Data<DBPool>,
+    pool: web::Data<Pool>,
     payload: Json<NewInst>,
 ) -> Result<HttpResponse, HandlerError> {
-    actix_rt::spawn_blocking(async { main_procedure(req, pool, payload) })
-        .await
-        .unwrap()
+    let valid_resp_or_not = main_procedure(req, pool, payload).await;
+    match valid_resp_or_not {
+        Ok(resp) => return Ok(resp),
+        Err(err) => return Err(err),
+    }
 }
 
-fn main_procedure(
+#[derive(Serialize)]
+struct RespUid {
+    uid: String,
+}
+
+async fn main_procedure(
     req: HttpRequest,
-    pool: Data<DBPool>,
+    pool: Data<Pool>,
     payload: Json<NewInst>,
 ) -> Result<HttpResponse, HandlerError> {
-    // We first filter the request
-    let ip: String;
-    if let Some(_ip) = crate::api::security::request_filter(&req) {
-        ip = _ip.to_string();
+    let ip: IpAddr;
+    // First filter the request.
+    // Then verify that the request is coming from a trusted source
+    // and that maximum request per minute is not exceeded.
+    // If not it gets the ip.
+    if let Some(_ip) = security::request_filter(&req).await {
+        ip = _ip;
     } else {
-        return Err(HandlerError::InvalidRequest);
+        return Err(HandlerError::Unauthorized);
     };
-    let user = payload.into_inner().usr;
-    // Initiate connection
-    let mut conn = pool.get().expect("CONNECTION_POOL_ERROR");
-    // Serialize device
-    let device = serde_json::to_string(&user.dev).unwrap();
-    let device: serde_json::Value = serde_json::from_str(&device[..]).unwrap();
-    // Serialize country
-    let country = &user.cou;
-    // Init uid
-    let _uid: Uuid;
-    // Check if user exists
-    let user_with_given_ip = user_exists(&mut conn, &ip);
-    if user_with_given_ip.is_ok() {
-        _uid = user_with_given_ip.unwrap();
+    // Prevent DDOS attack by blocking ip.
+    // prevent_flood also prevent data corruption
+    // by preventing too many request per minute.
+    let sec = security::prevent_flood(ip, &pool).await;
+    if sec.is_err() {
+        return Err(HandlerError::DBError);
     } else {
-        let new_user = insert_user(&mut conn, device, country, &ip);
-        if new_user.is_err() {
-            return Err(HandlerError::DBError);
-        }
-        _uid = new_user.unwrap().0;
-    }
-    Ok(HttpResponse::Ok().body(format!("{{ \"uid\": \"{}\" }} ", _uid)))
-}
-
-#[derive(Display, Debug)]
-pub enum HandlerError {
-    DBError,
-    InvalidRequest,
-    InternalError,
-}
-
-impl ResponseError for HandlerError {
-    fn status_code(&self) -> actix_web::http::StatusCode {
-        match self {
-            HandlerError::InternalError => actix_web::http::StatusCode::INTERNAL_SERVER_ERROR,
-            HandlerError::DBError => actix_web::http::StatusCode::INTERNAL_SERVER_ERROR,
-            HandlerError::InvalidRequest => actix_web::http::StatusCode::BAD_REQUEST,
+        if !sec.unwrap() {
+            return Err(HandlerError::ToomManyRequest);
         }
     }
-
-    fn error_response(&self) -> HttpResponse {
-        HttpResponse::build(self.status_code()).body(match self {
-            HandlerError::InternalError => "Internal server error",
-            HandlerError::DBError => "DB error",
-            HandlerError::InvalidRequest => "Invalid request",
-        })
+    // Stores the user agent after its been verified.
+    let user_agent = get_ua(&req).unwrap();
+    // Verify signature.
+    // This is a heavy operation
+    // so it uses tokio::task::spawn_blocking.
+    let (sign_is_valid, json_obj) = tokio::task::spawn_blocking(move || {
+        // Get the encoded json.
+        // Decode from base64.
+        // Then verify signature.
+        let encoded_json = &payload.bp.dt;
+        let hash = &payload.bp.hash;
+        // Decode from base64.
+        let decoded_json = crypto::decodeb64(encoded_json);
+        crypto::verify_signature(hash, decoded_json, user_agent).unwrap()
+    })
+    .await
+    .unwrap();
+    // If signature isn't valid it returns error.
+    if !sign_is_valid {
+        return Err(HandlerError::Unauthorized);
     }
+    // Else json_obj is serialized into a super::device::Device struct
+    let user_device = serde_json::from_str(&json_obj);
+    // If the format is not respected => error.
+    let user_device: Device = match user_device {
+        Ok(device) => device,
+        Err(_) => return Err(HandlerError::InvalidRequest),
+    };
+    // Check if user exists with the uid given by the user
+    // If it does not exist, we create a new user
+    // Else we return the uid
+    if let Some(id) = user_exists(&user_device, ip, &pool).await {
+        let r = RespUid { uid: id.to_string() };
+        return Ok(HttpResponse::Ok().json(r));
+    };
+    // We didn't find the user in the database
+    // So we create a new user
+    let new_user = tokio::task::spawn_blocking(move ||  {
+        insert_user(pool, user_device,ip.to_string())
+    })
+    .await
+    .unwrap()
+    .await;
+    match new_user {
+        Ok(uid) => {
+            let r = RespUid { uid: uid.to_string() };
+            return Ok(HttpResponse::Ok().json(r));
+        }
+        Err(_) => return Err(HandlerError::DBError),
+    }
+}
+
+fn get_ua(req: &HttpRequest) -> Option<String> {
+    let header = req.headers().get("user-agent")?;
+    let header = header.to_str().ok()?;
+    Some(header.to_string())
 }
