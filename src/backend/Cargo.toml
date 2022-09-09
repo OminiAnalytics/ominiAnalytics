@@ -27,3 +27,8 @@ tokio-pg-mapper = "^0.2.0"
 tokio-pg-mapper-derive = "^0.2.0"
 deadpool-postgres = { version = "^0.10", features = ["serde"] }
 chrono = "^0.4.5"
+base64 = "^0.13"
+sha2 = "^0.10"
+hmac = "^0.12"
+hex= "^0.4"
+postgres-types = {version="^0.2",features = ["derive", "with-serde_json-1"]}

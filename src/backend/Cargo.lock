@@ -341,18 +341,23 @@ dependencies = [
  "actix-rt",
  "actix-session",
  "actix-web",
+ "base64",
  "chrono",
  "deadpool-postgres",
  "derive_more",
  "diesel",
  "dotenv",
  "env_logger",
+ "hex",
+ "hmac",
  "log",
+ "postgres-types",
  "r2d2",
  "regex",
  "serde",
  "serde_json",
  "serde_yaml",
+ "sha2",
  "tokio",
  "tokio-pg-mapper",
  "tokio-pg-mapper-derive",
@@ -825,6 +830,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "hex"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+
+[[package]]
 name = "hkdf"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1166,6 +1177,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "postgres-derive"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d0c2c18e40b92144b05e6f3ae9d1ee931f0d1afa9410ac8b97486c6eaaf91201"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "postgres-protocol"
 version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1191,6 +1213,7 @@ checksum = "73d946ec7d256b04dfadc4e6a3292324e6f417124750fc5c0950f981b703a0f1"
 dependencies = [
  "bytes",
  "fallible-iterator",
+ "postgres-derive",
  "postgres-protocol",
  "serde",
  "serde_json",
