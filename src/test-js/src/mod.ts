@@ -1,10 +1,22 @@
+/**
+ * File: mod.ts
+ * Created Date: 08 Sep 2022
+ * Author: realbacon
+ * -----
+ * Last Modified: 9/09/2022 12:03:12
+ * Last Modified: 9/09/2022 12:03:12
+ * Modified By: realbacon
+ * License  : MIT
+ * -----
+ **/
+
 /* eslint-disable @typescript-eslint/restrict-plus-operands */
 /**
  * File: test.js
  * Created Date: 08 Sep 2022
  * Author: realbacon
  * -----
- * Last Modified: 8/09/2022 06:25:46
+ * Last Modified: 9/09/2022 12:03:12
  * Modified By: realbacon
  * -----
  * @license MIT
@@ -41,9 +53,9 @@ class Otest {
    * @param {string} name The test name
    */
   // eslint-disable-next-line @typescript-eslint/ban-types
-  testResult(func: Function, expect: unknown, name: string): void {
+  async testResult(func: Function, expect: unknown): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    let result = func();
+    let result = await func();
     if (typeof result === 'object') {
       result = JSON.stringify(result);
     }
@@ -74,11 +86,11 @@ class Otest {
   /**
    * Run the tests suite
    */
-  run(): void {
+  async run(): Promise<void> {
     console.log(`Running ${this.name}...`.blue);
     for (const [name, test] of Object.entries(this.tests)) {
       console.log(`\n- Testing "${name.cyan}"`);
-      this.testResult(test.func, test.comp, name);
+      await this.testResult(test.func, test.comp);
     }
     const sum = this.passed + this.failed;
     console.log('\n');
