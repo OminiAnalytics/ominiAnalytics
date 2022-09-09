@@ -3,14 +3,14 @@
  Created Date: 30 Aug 2022
  Author: realbacon
  -----
- Last Modified: 1/09/2022 11:31:31
+ Last Modified: 8/09/2022 05:33:48
  Modified By: realbacon
  -----
  License  : MIT
  -----
 */
 
-use super::constants::{BOT_UA_LIST, MAX_REQUESTS_PER_IP_V4, MAX_REQUESTS_PER_IP_V6};
+use super::custom::constants::{BOT_UA_LIST, MAX_REQUESTS_PER_IP_V4, MAX_REQUESTS_PER_IP_V6};
 use crate::db::get_connection;
 use actix_web::HttpRequest;
 use chrono::Utc;
