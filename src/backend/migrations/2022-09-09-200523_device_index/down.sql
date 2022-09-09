@@ -1,0 +1,19 @@
+-- This file should undo anything in `up.sql`
+
+DROP TABLE IF EXISTS device_info_index;
+
+DROP INDEX IF EXISTS OS;
+
+DROP INDEX IF EXISTS Browser;
+
+DROP INDEX IF EXISTS Country;
+
+DROP INDEX IF EXISTS CPU;
+
+DROP INDEX IF EXISTS GPU;
+
+DROP INDEX IF EXISTS Memory;
+
+DROP INDEX IF EXISTS Screen;
+
+DROP INDEX IF EXISTS UserAgent;
