@@ -3,7 +3,7 @@
  Created Date: 25 Aug 2022
  Author: realbacon
  -----
- Last Modified: 7/09/2022 10:45:57
+ Last Modified: 7/09/2022 11:00:13
  Modified By: realbacon
  -----
  License  : MIT
@@ -63,7 +63,7 @@ async fn main() -> std::io::Result<()> {
     let server = HttpServer::new(move || {
         let logger = Logger::default();
         let json_config = web::JsonConfig::default()
-            .limit(700)
+            .limit(1000)
             .error_handler(|err, _req| {
                 // create custom error response
                 error::InternalError::from_response(err, HttpResponse::Conflict().finish()).into()
@@ -91,7 +91,6 @@ async fn main() -> std::io::Result<()> {
             .wrap(logger)
             .wrap(cors)
     })
-    .workers(1)
     .bind(env::var("SERVER_HOST").expect("SERVER_HOST not present in env"))?
     .run()
     .await?;
