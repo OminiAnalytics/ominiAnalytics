@@ -3,7 +3,7 @@
  * Created Date: 04 Sep 2022
  * Author: realbacon
  * -----
- * Last Modified: 7/09/2022 10:40:8
+ * Last Modified: 8/09/2022 11:43:7
  * Modified By: realbacon
  * -----
  * @license MIT
@@ -52,21 +52,27 @@ export const ominiCollector = {
     // Get hardware information
     const Hardware = ominiHardware.wrap()
     // Get browser information
-    const Browser = ominiBrowser.wrap()
+    const Browser = ominiBrowser
+      .setEnv(navigator.userAgent, navigator.userAgentData, navigator.navigator)
+      .wrap()
     // Get OS information
-    const Os = await ominiOs.wrap().then((os) => os)
+    const Os = await ominiOs
+      .setEnv(navigator.userAgent, navigator.userAgentData)
+      .wrap()
+      .then((os) => os)
     // Get location information
     const Country = ominiLocation.wrap()
     // Get json object
     const json = {
-      Country,
-      Browser,
-      Os,
-      Hardware,
-      UserAgent: navigator.userAgent
+      country: Country,
+      browser: Browser,
+      os: Os,
+      hardware: Hardware,
+      useragent: navigator.userAgent
     }
     // Get json string
     const jsonStr = JSON.stringify(json)
+    console.log(jsonStr)
     const sign = HmacSHA256(jsonStr, navigator.userAgent)
     return [Base64.stringify(parse.parse(jsonStr)), sign.toString()]
   }

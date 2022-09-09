@@ -3,17 +3,18 @@
  * Created Date: 30 Aug 2022
  * Author: realbacon
  * -----
- * Last Modified: 7/09/2022 10:39:51
+ * Last Modified: 8/09/2022 06:38:50
  * Modified By: realbacon
  * -----
  * @license MIT
  * -----
  **/
 /* @License MIT - OminiTracker */
+'use strict'
 
 import { ApiAsync } from './api.js'
 import { User } from './userTracker.js'
-import { ominiCollector } from './uid-gen/collector.js'
+import { ominiCollector } from './collect/collector.js'
 
 class OminiTracker {
   constructor (url) {

@@ -3,7 +3,7 @@
  * Created Date: 02 Sep 2022
  * Author: realbacon
  * -----
- * Last Modified: 8/09/2022 08:48:35
+ * Last Modified: 8/09/2022 09:16:1
  * Modified By: realbacon
  * -----
  * @license MIT
@@ -91,7 +91,7 @@ export const ominiHardware = {
       memory: this.getMemory(),
       cpu: this.getCPU(),
       gpu: this.getGPU(),
-      colorBufferFloat: this.getColorBufferFloat(),
+      color_buffer_float: this.getColorBufferFloat(),
       screen: this.getScreen()
     }
   }

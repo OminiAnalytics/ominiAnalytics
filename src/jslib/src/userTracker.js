@@ -3,12 +3,13 @@
  * Created Date: 30 Aug 2022
  * Author: realbacon
  * -----
- * Last Modified: 7/09/2022 10:03:33
+ * Last Modified: 8/09/2022 06:04:47
  * Modified By: realbacon
  * -----
  * @license MIT
  * -----
  **/
+'use strict'
 
 // User class
 export class User {
@@ -33,10 +34,12 @@ export class User {
       if (document.cookie.indexOf('Om_uid') > -1) {
         // If yes, check if it is valid
         const guidcookie = document.cookie.split('Om_uid=')[1].split(';')[0]
-        ;[result, uidcookie] = await this.validateUidFetch(guidcookie).then()
+        ;[result, uidcookie] = await this.validateUidFetch(guidcookie).then(
+          (a) => a
+        )
       } else {
         // If no, create new uid cookie
-        ;[result, uidcookie] = this.validateUidFetch('')
+        ;[result, uidcookie] = await this.validateUidFetch('').then((a) => a)
       }
       console.log(uidcookie)
       if (result === 'success') {

@@ -3,12 +3,13 @@
  * Created Date: 06 Sep 2022
  * Author: realbacon
  * -----
- * Last Modified: 7/09/2022 07:48:19
+ * Last Modified: 8/09/2022 06:05:11
  * Modified By: realbacon
  * -----
  * @license MIT
  * -----
  **/
+'use strict'
 
 export class ApiAsync {
   constructor (url) {
@@ -42,15 +43,12 @@ export class ApiAsync {
         .join('&')
     headers['Content-Type'] = 'application/json'
     // eslint-disable-next-line no-unused-vars
-    const _response = await fetch(
-      this.url + this.endpoints[endpoint] + paramString,
-      {
-        method: 'GET',
-        headers,
-        // allow cors
-        mode: 'cors'
-      }
-    )
+    await fetch(this.url + this.endpoints[endpoint] + paramString, {
+      method: 'GET',
+      headers,
+      // allow cors
+      mode: 'cors'
+    })
       .then((resp) => {
         if (resp.ok) {
           Response.new({

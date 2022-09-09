@@ -3,7 +3,7 @@
  * Created Date: 02 Sep 2022
  * Author: realbacon
  * -----
- * Last Modified: 7/09/2022 09:01:51
+ * Last Modified: 9/09/2022 12:15:19
  * Modified By: realbacon
  * -----
  * @license MIT
@@ -27,8 +27,17 @@ Supported OS :
 */
 
 export const ominiOs = {
-  ua: navigator.userAgent,
-  uag: navigator.userAgentData,
+  /**
+   * Set environment to browser
+   * @param {string} ua
+   * @param {*} uag
+   * @returns {ominiOs} The ominiBrowser object
+   */
+  setEnv: function (ua, uag) {
+    this.ua = ua
+    this.uag = uag
+    return this
+  },
   /**
    * Wrap the OS information
    * Returns an array [{ OS name, OS version}, Device type, Arch ]
@@ -39,12 +48,16 @@ export const ominiOs = {
    */
   wrap: async function () {
     const arch = this.getArch()
-    const res = await this.getOsAndTypeExp().then((a) => {
-      return a
-    })
+    let res = this.getOsAndTypeExp()
+    // If res is a promise
+    if (res instanceof Promise) {
+      res = await res.then((res) => {
+        return [res, this.getDeviceType(), arch]
+      })
+    }
     const os = res[0]
     const type = res[1]
-    return [os, type, arch]
+    return { name: os.name, version: os.version, typ: type, arch }
   },
 
   /**
@@ -165,6 +178,10 @@ export const ominiOs = {
       const ser = this.testWindows()
       return [{ name: ser[1], version: ser[2] }, ser[3]]
     }
+    if (this.testWindowsPhone()[0]) {
+      const ser = this.testWindowsPhone()
+      return [{ name: ser[1], version: ser[2] }, ser[3]]
+    }
     if (this.testLinux()[0]) {
       const ser = this.testLinux()
       return [{ name: ser[1], version: ser[2] }, ser[3]]
@@ -199,10 +216,6 @@ export const ominiOs = {
     }
     if (this.testIpad()[0]) {
       const ser = this.testIpad()
-      return [{ name: ser[1], version: ser[2] }, ser[3]]
-    }
-    if (this.testWindowsPhone()[0]) {
-      const ser = this.testWindowsPhone()
       return [{ name: ser[1], version: ser[2] }, ser[3]]
     }
     return [{ name: 'unknown', version: 'unknown' }, 'unknown']
@@ -380,7 +393,7 @@ export const ominiOs = {
   testChromeOS: function () {
     if (this.ua.indexOf('CrOS') > -1) {
       const p = 'desktop'
-      let v = this.ua.match(/CrOS ([\w.]+)/i)
+      let v = this.ua.match(/CrOS [a-zA-Z_1-9]+ ([\d.]+)/i)
       if (v) {
         v = v[1]
       } else {

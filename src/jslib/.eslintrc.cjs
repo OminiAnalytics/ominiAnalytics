@@ -3,7 +3,7 @@
  * Created Date: 07 Sep 2022
  * Author: realbacon
  * -----
- * Last Modified: 7/09/2022 07:47:52
+ * Last Modified: 8/09/2022 09:54:52
  * Modified By: realbacon
  * -----
  * @license MIT
@@ -18,8 +18,7 @@ module.exports = {
   extends: 'standard',
   overrides: [],
   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module'
+    ecmaVersion: 'latest'
   },
   ignorePatterns: ['dist/*', 'webpack.config.js'],
   rules: {

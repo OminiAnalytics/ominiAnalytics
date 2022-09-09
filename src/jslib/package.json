@@ -1,37 +1,37 @@
 {
-  "name": "jslib",
-  "version": "1.0.0",
-  "description": "",
-  "private": true,
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npx webpack --mode production --config webpack.config.js && uglifyjs dist/bundle.js -o dist/bundle.min.js  --beautify quote_style=3 --comments /License/ && rm dist/bundle.js",
-    "watch": "npx webpack --mode production --watch --config webpack.config.js"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@types/crypto-js": "^4.1.1",
-    "eslint": "^8.23.0",
-    "eslint-config-standard": "^17.0.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-n": "^15.2.5",
-    "eslint-plugin-promise": "^6.0.1",
-    "terser-webpack-plugin": "^5.3.6",
-    "uglify-save-license": "^0.4.1",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0"
-  },
-  "dependencies": {
-    "crypto-js": "^4.1.1",
-    "js-crypto-key-utils": "^1.0.4",
-    "js-crypto-rsa": "^1.0.4",
-    "jsencrypt": "^3.2.1",
-    "md5": "^2.3.0",
-    "moment-timezone": "^0.5.37",
-    "prettier": "^2.7.1",
-    "uglify-js": "^3.17.0",
-    "uglifyjs": "^2.4.11"
-  }
+    "name": "jslib",
+    "version": "1.0.0",
+    "description": "",
+    "private": true,
+    "scripts": {
+        "test": "npx ts-node test/test.ts",
+        "build": "npx webpack --mode production --config webpack.config.js && uglifyjs dist/bundle.js -o dist/bundle.min.js  --compress --mangle --beautify quote_style=3 --comments /License/ && rm dist/bundle.js",
+        "watch": "npx webpack --mode production --watch --config webpack.config.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/crypto-js": "^4.1.1",
+        "eslint": "^8.23.0",
+        "eslint-config-standard": "^17.0.0",
+        "eslint-plugin-import": "^2.26.0",
+        "eslint-plugin-n": "^15.2.5",
+        "eslint-plugin-promise": "^6.0.1",
+        "terser-webpack-plugin": "^5.3.6",
+        "uglify-save-license": "^0.4.1",
+        "webpack": "^5.74.0",
+        "webpack-cli": "^4.10.0"
+    },
+    "dependencies": {
+        "crypto-js": "^4.1.1",
+        "js-crypto-key-utils": "^1.0.4",
+        "js-crypto-rsa": "^1.0.4",
+        "jsencrypt": "^3.2.1",
+        "md5": "^2.3.0",
+        "moment-timezone": "^0.5.37",
+        "prettier": "^2.7.1",
+        "uglify-js": "^3.17.0",
+        "uglifyjs": "^2.4.11"
+    }
 }
