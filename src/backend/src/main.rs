@@ -3,7 +3,7 @@
  Created Date: 25 Aug 2022
  Author: realbacon
  -----
- Last Modified: 7/09/2022 11:00:13
+ Last Modified: 13/09/2022 09:24:39
  Modified By: realbacon
  -----
  License  : MIT
@@ -15,13 +15,12 @@ use actix_cors::Cors;
 use actix_web::{
     error, guard, http::header, middleware::Logger, web, App, HttpResponse, HttpServer,
 };
-use api::alive::endpoint::is_alive;
+use api::event::alive::endpoint::is_alive;
 use api::main::endpoint::main_procedure_handler;
-mod models;
 use dotenv::dotenv;
 use std::env;
 use tokio_postgres::NoTls;
-
+mod models;
 pub mod db {
     use deadpool_postgres::{Client, ManagerConfig, Pool, RecyclingMethod};
     // Helper function to read environment variable
