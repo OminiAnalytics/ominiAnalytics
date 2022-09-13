@@ -3,7 +3,7 @@
  * Created Date: 08 Sep 2022
  * Author: realbacon
  * -----
- * Last Modified: 9/09/2022 12:16:50
+ * Last Modified: 12/09/2022 10:54:31
  * Modified By: realbacon
  * -----
  * License  : MIT
@@ -84,5 +84,18 @@ osTest.new(
   },
   {name: 'Windows Phone', version: '8.1', typ: 'mobile', arch: 'x64'}
 );
+osTest.new(
+  'Linux',
+  () => {
+    let testO = ominiOs;
+    testO = testO.setEnv(
+      'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:24.0) Gecko/20100101 Firefox/24.0',
+      undefined
+    );
+    const r = testO.wrap();
 
+    return r;
+  },
+  {name: 'Linux', version: 'i686', typ: 'desktop', arch: 'x64'}
+);
 export default osTest;

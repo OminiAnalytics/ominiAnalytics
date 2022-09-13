@@ -3,7 +3,7 @@
  * Created Date: 08 Sep 2022
  * Author: realbacon
  * -----
- * Last Modified: 8/09/2022 11:37:30
+ * Last Modified: 12/09/2022 10:49:11
  * Modified By: realbacon
  * -----
  * @license MIT
@@ -83,6 +83,33 @@ browserTest.new(
     return testB.gbrowser();
   },
   {name: 'Yandex', version: '22', fversion: '22.7.5'}
+);
+browserTest.new(
+  'Edge',
+  () => {
+    const testB = ominiBrowser;
+    testB.setEnv(
+      'Mozilla/5.0 (Linux; Android 10; ONEPLUS A6003) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.5195.79 Mobile Safari/537.36 EdgA/100.0.1185.50',
+      undefined,
+      {}
+    );
+    return testB.gbrowser();
+  },
+  {name: 'Edge', version: '100', fversion: '100.0.1185.50'}
+);
+
+browserTest.new(
+  'Chrome Mobile',
+  () => {
+    const testB = ominiBrowser;
+    testB.setEnv(
+      'ozilla/5.0 (iPad; CPU OS 15_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/105.0.5195.100 Mobile/15E148 Safari/604.1',
+      undefined,
+      {}
+    );
+    return testB.gbrowser();
+  },
+  {name: 'Chrome', version: '105', fversion: '105.0.5195.100'}
 );
 
 export default browserTest;
