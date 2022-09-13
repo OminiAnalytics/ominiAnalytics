@@ -3,28 +3,28 @@
  Created Date: 30 Aug 2022
  Author: realbacon
  -----
- Last Modified: 10/09/2022 12:00:2
+ Last Modified: 13/09/2022 08:35:27
  Modified By: realbacon
  -----
  License  : MIT
  -----
 */
 
-use std::net::{IpAddr};
+use std::net::IpAddr;
 
 use actix_web::web;
 use actix_web::{post, web::Data, web::Json, HttpRequest, HttpResponse};
 use deadpool_postgres::Pool;
 // Import data structure
 use super::crypto;
-use super::device::Device;
+use super::structs::Device;
+use super::structs::NewInst;
 use crate::api::custom::errors::HandlerError;
-use crate::api::custom::structs::NewInst;
 use crate::api::security;
 use serde::Serialize;
 
 // Db
-use super::db::{user_exists,insert_user};
+use super::handlers::{insert_user, user_exists};
 
 #[post("/main")]
 pub async fn main_procedure_handler(
@@ -50,6 +50,7 @@ async fn main_procedure(
     payload: Json<NewInst>,
 ) -> Result<HttpResponse, HandlerError> {
     let ip: IpAddr;
+    let response: RespUid;
     // First filter the request.
     // Then verify that the request is coming from a trusted source
     // and that maximum request per minute is not exceeded.
@@ -101,25 +102,36 @@ async fn main_procedure(
     // Check if user exists with the uid given by the user
     // If it does not exist, we create a new user
     // Else we return the uid
-    if let Some(id) = user_exists(&user_device, ip, &pool).await {
-        let r = RespUid { uid: id.to_string() };
-        return Ok(HttpResponse::Ok().json(r));
-    };
-    // We didn't find the user in the database
-    // So we create a new user
-    let new_user = tokio::task::spawn_blocking(move ||  {
-        insert_user(pool, user_device,ip.to_string())
-    })
-    .await
-    .unwrap()
-    .await;
-    match new_user {
-        Ok(uid) => {
-            let r = RespUid { uid: uid.to_string() };
-            return Ok(HttpResponse::Ok().json(r));
+    match user_exists(&user_device, ip, &pool).await {
+        Some(id) => {
+            response = RespUid {
+                uid: id.to_string(),
+            };
         }
-        Err(_) => return Err(HandlerError::DBError),
-    }
+        None => {
+            // We didn't find the user in the database
+            // So we create a new user
+            let new_user = tokio::task::spawn_blocking(move || {
+                let u = insert_user(pool, user_device, ip.to_string());
+                return u;
+            })
+            .await
+            .unwrap()
+            .await;
+            match new_user {
+                Ok(id) => match id {
+                    Some(id) => {
+                        response = RespUid {
+                            uid: id.to_string(),
+                        };
+                    }
+                    None => return Err(HandlerError::DBError),
+                },
+                Err(_) => return Err(HandlerError::DBError),
+            };
+        }
+    };
+    Ok(HttpResponse::Ok().json(response))
 }
 
 fn get_ua(req: &HttpRequest) -> Option<String> {
