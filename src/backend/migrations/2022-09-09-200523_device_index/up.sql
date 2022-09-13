@@ -5,8 +5,8 @@
  */
 
 CREATE TABLE
-    IF NOT EXISTS device_info_index (
-        id INTEGER PRIMARY KEY,
+    IF NOT EXISTS omini_device_info_index (
+        id SERIAL PRIMARY KEY,
         uid UUID NOT NULL,
         -- user id
         OsType VARCHAR(10) NOT NULL,
@@ -27,47 +27,87 @@ CREATE TABLE
         UserAgent VARCHAR(200) NOT NULL
     );
 
-CREATE INDEX
-    OS ON device_info_index USING GIN (
+ALTER TABLE
+    omini_device_info_index
+ADD
+    COLUMN OS_ts tsvector GENERATED ALWAYS AS (
         to_tsvector(
             'english',
-            OsType || ' ' || OsVersion || ' ' || OsName || ' ' || OsArch
+            OsName || ' ' || OsVersion || ' ' || OsArch || ' ' || OsType
         )
-    );
+    ) STORED;
 
-CREATE INDEX
-    Browser ON device_info_index USING GIN (
+ALTER TABLE
+    omini_device_info_index
+ADD
+    COLUMN Browser_ts tsvector GENERATED ALWAYS AS (
         to_tsvector(
             'english',
             BrowserName || ' ' || BrowserVersion || ' ' || BrowserFversion
         )
-    );
+    ) STORED;
 
-CREATE INDEX
-    Country ON device_info_index USING GIN (
+ALTER TABLE
+    omini_device_info_index
+ADD
+    COLUMN Country_ts tsvector GENERATED ALWAYS AS (
         to_tsvector('english', Country)
-    );
+    ) STORED;
 
-CREATE INDEX
-    CPU ON device_info_index USING GIN (to_tsvector('english', CPU));
+ALTER TABLE
+    omini_device_info_index
+ADD
+    COLUMN CPU_ts tsvector GENERATED ALWAYS AS (to_tsvector('english', CPU)) STORED;
 
-CREATE INDEX
-    GPU ON device_info_index USING GIN (to_tsvector('english', GPU));
+ALTER TABLE
+    omini_device_info_index
+ADD
+    COLUMN GPU_ts tsvector GENERATED ALWAYS AS (to_tsvector('english', GPU)) STORED;
 
-CREATE INDEX
-    Memory ON device_info_index USING GIN (
+ALTER TABLE
+    omini_device_info_index
+ADD
+    COLUMN Memory_ts tsvector GENERATED ALWAYS AS (
         to_tsvector('english', Memory)
-    );
+    ) STORED;
 
-CREATE INDEX
-    Screen ON device_info_index USING GIN (
+ALTER TABLE
+    omini_device_info_index
+ADD
+    COLUMN Screen_ts tsvector GENERATED ALWAYS AS (
         to_tsvector(
             'english',
             ScreenHeight || ' ' || ScreenWidth || ' ' || ScreenColor || ' ' || ColorBuffer
         )
-    );
+    ) STORED;
+
+ALTER TABLE
+    omini_device_info_index
+ADD
+    COLUMN UserAgent_ts tsvector GENERATED ALWAYS AS (
+        to_tsvector('english', UserAgent)
+    ) STORED;
 
 CREATE INDEX
-    UserAgent ON device_info_index USING GIN (
-        to_tsvector('english', UserAgent)
-    );
+    device_idx_ua ON omini_device_info_index USING GIN (UserAgent_ts);
+
+CREATE INDEX
+    device_idx_os ON omini_device_info_index USING GIN (OS_ts);
+
+CREATE INDEX
+    device_idx_browser ON omini_device_info_index USING GIN (Browser_ts);
+
+CREATE INDEX
+    device_idx_country ON omini_device_info_index USING GIN (Country_ts);
+
+CREATE INDEX
+    device_idx_cpu ON omini_device_info_index USING GIN (CPU_ts);
+
+CREATE INDEX
+    device_idx_gpu ON omini_device_info_index USING GIN (GPU_ts);
+
+CREATE INDEX
+    device_idx_memory ON omini_device_info_index USING GIN (Memory_ts);
+
+CREATE INDEX
+    device_idx_screen ON omini_device_info_index USING GIN (Screen_ts);
