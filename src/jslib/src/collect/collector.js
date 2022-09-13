@@ -3,7 +3,7 @@
  * Created Date: 04 Sep 2022
  * Author: realbacon
  * -----
- * Last Modified: 8/09/2022 11:43:7
+ * Last Modified: 12/09/2022 10:57:34
  * Modified By: realbacon
  * -----
  * @license MIT
@@ -70,6 +70,10 @@ export const ominiCollector = {
       hardware: Hardware,
       useragent: navigator.userAgent
     }
+    /**
+    @warning Delete the following line when high precesion device fingerprinting will be implemented
+    **/
+    json.browser.fversion = json.browser.version
     // Get json string
     const jsonStr = JSON.stringify(json)
     console.log(jsonStr)

@@ -3,12 +3,14 @@
  * Created Date: 02 Sep 2022
  * Author: realbacon
  * -----
- * Last Modified: 8/09/2022 11:41:19
+ * Last Modified: 12/09/2022 10:46:29
  * Modified By: realbacon
  * -----
  * @license MIT
  * -----
  **/
+
+import { utilities } from '../utilities.js'
 
 /*
 Supported browser:
@@ -58,60 +60,87 @@ export const ominiBrowser = {
         fversion: fbrands.version
       }
     }
-    let name
-    let version
-    let fversion
-    if (this.ua.indexOf('Trident') !== -1) {
-      name = 'IE'
-      version = this.match('Trident')[1].split('.')[0]
-      fversion = this.match('Trident')[1]
-    } else if (this.ua.indexOf('YaBrowser') !== -1) {
-      name = 'Yandex'
-      version = this.match('YaBrowser')[1].split('.')[0]
-      fversion = this.match('YaBrowser')[1]
-    } else if (this.ua.indexOf('Vivaldi') !== -1) {
-      name = 'Vivaldi'
-      version = this.match('Vivaldi')[1].split('.')[0]
-      fversion = this.match('Vivaldi')[1]
-    } else if (this.ua.indexOf('OPR') !== -1) {
-      name = 'Opera'
-      version = this.match('OPR')[1].split('.')[0]
-      fversion = this.match('OPR')[1]
-    } else if (this.ua.indexOf('Version') !== -1) {
-      name = 'Safari'
-      version = this.match('Safari')[1].split('.')[0]
-      fversion = this.match('Safari')[1]
-    } else if (this.ua.indexOf('Edge') !== -1) {
-      name = 'Edge'
-      version = this.match('Edge')[1].split('.')[0]
-      fversion = this.match('Edge')[1]
-    } else if (this.ua.indexOf('Firefox') !== -1) {
-      name = 'Firefox'
-      version = this.match('Firefox')[1].split('.')[0]
-      fversion = this.match('Firefox')[1]
-    } else if (this.ua.indexOf('Chrome') !== -1) {
-      name = 'Chrome'
-      version = this.match('Chrome')[1].split('.')[0]
-      fversion = this.match('Chrome')[1]
+    // Order is important
+    if (this.isYandex().isOk()) {
+      return this.isYandex().unwrap()
     }
+    if (this.isTrident().isOk()) {
+      return this.isTrident().unwrap()
+    }
+    if (this.isEdge().isOk()) {
+      return this.isEdge().unwrap()
+    }
+    if (this.isChrome().isOk()) {
+      return this.isChrome().unwrap()
+    }
+    if (this.isFirefox().isOk()) {
+      return this.isFirefox().unwrap()
+    }
+    if (this.isSafari().isOk()) {
+      return this.isSafari().unwrap()
+    }
+    if (this.isOpera().isOk()) {
+      return this.isOpera().unwrap()
+    }
+    if (this.isVivaldi().isOk()) {
+      return this.isVivaldi().unwrap()
+    }
+    return { name: 'Unknown', version: 'Unknown', fversion: 'Unknown' }
+  },
+  isTrident: function () {
+    const browserRegex = '(Trident)/([\\d.]+)'
+    return this.handleMatch(browserRegex)
+  },
+  isYandex: function () {
+    const browserRegex = '(YaBrowser)/([\\d.]+)'
 
-    return {
-      name,
-      version,
-      fversion
-    }
+    const r = this.handleMatch(browserRegex)
+    if (r.isOk()) r.data.name = 'Yandex' // Change the name to Yandex
+    return r
+  },
+  isVivaldi: function () {
+    const browserRegex = '(Vivaldi)/([\\d.]+)'
+    return this.handleMatch(browserRegex)
+  },
+  isOpera: function () {
+    const browserRegex = '(OPR|Opera)/([\\d.]+)'
+    const r = this.handleMatch(browserRegex)
+    if (r.isOk()) r.data.name = 'Opera' // Change the name to Opera
+    return r
+  },
+  isSafari: function () {
+    const browserRegex = 'Version/[\\d.]+ (Safari)/([\\d.]+)'
+    return this.handleMatch(browserRegex)
+  },
+  isEdge: function () {
+    const browserRegex = '(Edg[\\S]{0,})/([\\d.]+)'
+    const r = this.handleMatch(browserRegex)
+    if (r.isOk()) r.data.name = 'Edge' // Change the name to Edge
+    return r
+  },
+  isFirefox: function () {
+    const browserRegex = '(Firefox)/([\\d.]+)'
+    return this.handleMatch(browserRegex)
+  },
+  isChrome: function () {
+    const browserRegex = '(Chrome|CriOS)/([\\d.]+)[\\S\\s]{0,} Safari/[\\d.]+$'
+    const r = this.handleMatch(browserRegex)
+    if (r.isOk()) r.data.name = 'Chrome' // Change the name to Chrome
+    return r
   },
   /**
-   * Return the browser version
-   * @returns {string} Browser version
-   * @example
-   * const version = ominiBrowser.getVersion();
-   * console.log(version);
-   * // => "92"
-   **/
-  match: function (regex) {
-    // eslint-disable-next-line no-useless-escape
-    return this.ua.match(new RegExp(`${regex}\\\/([\\S]+)`, 'i'))
+   * Return a Result object with browser name, major-version and full-version
+   * @param {object} match The match object
+   * @returns {utilities.Result} Result object with browser name, major-version and full-version
+   * */
+  handleMatch: function (reg) {
+    const match = utilities.matchUA(this.ua, reg)
+    if (match.isOk()) {
+      const [browser, fversion] = match.unwrap()
+      const version = fversion.split('.')[0] || fversion
+      return new utilities.Result('ok', { name: browser, version, fversion })
+    }
+    return new utilities.Result('error', null)
   },
   /**
    * Wrap the browser information
