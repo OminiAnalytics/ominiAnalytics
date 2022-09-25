@@ -3,7 +3,7 @@
  * Created Date: 12 Sep 2022
  * Author: realbacon
  * -----
- * Last Modified: 12/09/2022 10:07:20
+ * Last Modified: 21/09/2022 06:56:46
  * Modified By: realbacon
  * -----
  * @license MIT
@@ -39,7 +39,7 @@ export const utilities = {
 
     /**
      * Return the status of the result
-     * @returns {boolean} True if the result is ok
+     * @returns {boolean} True if the result is ok, else false
      */
     isOk () {
       return this.status === 'ok'
