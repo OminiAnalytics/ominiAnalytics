@@ -3,7 +3,7 @@
  Created Date: 30 Aug 2022
  Author: realbacon
  -----
- Last Modified: 13/09/2022 09:26:43
+ Last Modified: 24/09/2022 11:36:55
  Modified By: realbacon
  -----
  License  : MIT
@@ -11,7 +11,7 @@
 */
 
 // Actix web & co
-use crate::api::custom::errors::HandlerError;
+use crate::errors::HandlerError;
 use actix_web::{post, web::Data, web::Json, HttpResponse};
 use chrono::Utc;
 use deadpool_postgres::Pool;
@@ -22,7 +22,7 @@ use crate::api::event::structs::ValidAliveMessage;
 use crate::models::NewAliveMessage;
 
 // DB
-use crate::api::event::handlers::{get_last_signal, insert_alive_message};
+use super::handlers::{get_last_signal, insert_alive_message};
 // Constants
 use crate::api::custom::constants::{KILL_SESSION_DELAY, SIGNAL_TYPE_ALIVE, SIGNAL_TYPE_SESSION};
 
@@ -30,7 +30,7 @@ use crate::api::custom::constants::{KILL_SESSION_DELAY, SIGNAL_TYPE_ALIVE, SIGNA
 /// # Arguments
 /// * `pool` - The database pool
 /// * `alive_message` - ValidAliveMessage struct
-#[post("/event/alive")]
+#[post("/alive")]
 pub async fn is_alive(
     pool: Data<Pool>,
     alive_message: Json<ValidAliveMessage>,

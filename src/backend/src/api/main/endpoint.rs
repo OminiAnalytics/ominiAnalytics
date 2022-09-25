@@ -3,7 +3,7 @@
  Created Date: 30 Aug 2022
  Author: realbacon
  -----
- Last Modified: 13/09/2022 08:35:27
+ Last Modified: 24/09/2022 11:36:39
  Modified By: realbacon
  -----
  License  : MIT
@@ -19,8 +19,8 @@ use deadpool_postgres::Pool;
 use super::crypto;
 use super::structs::Device;
 use super::structs::NewInst;
-use crate::api::custom::errors::HandlerError;
 use crate::api::security;
+use crate::errors::HandlerError;
 use serde::Serialize;
 
 // Db
@@ -55,7 +55,7 @@ async fn main_procedure(
     // Then verify that the request is coming from a trusted source
     // and that maximum request per minute is not exceeded.
     // If not it gets the ip.
-    if let Some(_ip) = security::request_filter(&req).await {
+    if let Some(_ip) = security::request_filter(&req, &pool).await {
         ip = _ip;
     } else {
         return Err(HandlerError::Unauthorized);

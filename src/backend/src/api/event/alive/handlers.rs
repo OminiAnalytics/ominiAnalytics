@@ -3,7 +3,7 @@
  Created Date: 30 Aug 2022
  Author: realbacon
  -----
- Last Modified: 13/09/2022 09:14:46
+ Last Modified: 25/09/2022 02:50:15
  Modified By: realbacon
  -----
  License  : MIT
@@ -21,9 +21,6 @@ pub async fn insert_alive_message(
     pool: &Data<Pool>,
     new_alive_message: &NewAliveMessage,
 ) -> Result<u8, tokio_postgres::Error> {
-    /*diesel::insert_into(omini_alive_messages::table)
-    .values(new_alive_message)
-    .execute(conn)*/
     let conn = get_connection(pool)
         .await
         .expect("Failed to get connection");

@@ -1,14 +1,15 @@
 /*
- File: config.rs
+ File: security.rs
  Created Date: 30 Aug 2022
  Author: realbacon
  -----
- Last Modified: 8/09/2022 05:33:48
+ Last Modified: 16/09/2022 12:52:0
  Modified By: realbacon
  -----
  License  : MIT
  -----
 */
+
 
 use super::custom::constants::{BOT_UA_LIST, MAX_REQUESTS_PER_IP_V4, MAX_REQUESTS_PER_IP_V6};
 use crate::db::get_connection;
@@ -16,25 +17,37 @@ use actix_web::HttpRequest;
 use chrono::Utc;
 use deadpool_postgres::Pool;
 use regex::Regex;
-use serde::{Deserialize, Serialize};
-use serde_yaml::Sequence;
 use std::env;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
-use std::{fs::File, io::Read};
 
-pub fn valid_origin(req: &HttpRequest) -> bool {
+/// This function validates the origin based on the rules set by managers
+/// or admins in the dashboard panel.
+/// It returns a boolean value.
+/// If the origin is valid, it returns true.
+/// If the origin is invalid, it returns false.
+/// # Arguments
+/// * `req` - The request object.
+/// * `pool` - The database connection pool.
+/// # Returns
+/// * `bool` - The boolean value.
+pub async fn valid_origin(req: &HttpRequest, pool: &Pool) -> bool {
     let request_origin = req.headers().get("Referer");
-    let cfg = read_config();
-    let cfg = match cfg {
-        Ok(cfg) => cfg,
+    let request_origin = match request_origin {
+        Some(origin) => Some(origin),
+        None => req.headers().get("Origin"),
+    };
+    let allow_list = read_config(pool);
+    let allow_list = match allow_list.await {
+        Ok(v) => v,
 
         Err(_) => return false,
     };
     match request_origin {
         Some(url) => {
             let result = false;
-            for reg_str in cfg.autorized_urls.iter() {
+            for reg_str in allow_list.iter() {
                 let reg = Regex::new(reg_str).unwrap();
+                println!("reg_str: {}", reg_str);
                 if reg.is_match(url.to_str().unwrap()) == true {
                     return true;
                 }
@@ -45,27 +58,33 @@ pub fn valid_origin(req: &HttpRequest) -> bool {
     }
 }
 
-// read the file "config.yaml" and parse it
-pub fn read_config() -> Result<Config, std::io::Error> {
-    let mut file = File::open("./src/config.yaml")?;
-    let mut contents = String::new();
-    file.read_to_string(&mut contents).unwrap();
-    let cfg: Config = serde_yaml::from_str(&contents[..]).unwrap();
-    Ok(cfg)
+/// This function reads the config from the database.
+/// It returns a vector of strings with the allowed origins regex
+/// # Arguments
+/// * `pool` - The database connection pool.
+/// # Returns
+/// * `Vec<String>` - The vector of regex strings.
+pub async fn read_config(pool: &Pool) -> Result<Vec<String>, tokio_postgres::Error> {
+    let conn = get_connection(pool).await.unwrap();
+    let rows = conn
+        .query(
+            "SELECT allowed_regex FROM omini_rules WHERE active = true",
+            &[],
+        )
+        .await?;
+    let mut vec_regex = Vec::new();
+    for row in rows.iter() {
+        let regex: String = row.get(0);
+        vec_regex.push(regex);
+    }
+    Ok(vec_regex)
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Config {
-    name: String,
-    autorized_urls: Vec<String>,
-    dashboard_creds: Sequence,
-}
-
-// Return the ip address of the client
-/*
-req : HttpRequest
-return : Option<IpAddr>
-*/
+/// Return the ip address of the client
+/// # Arguments
+/// * `req` - The request object.
+/// # Returns
+/// * `Option<IpAddr>` - The ip address of the client.
 pub fn get_ip(req: &HttpRequest) -> Option<IpAddr> {
     if env::var("ENV").map_err(|_| "DEV") == Ok(String::from("DEV")) {
         return Some(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)));
@@ -105,14 +124,15 @@ pub fn get_ip(req: &HttpRequest) -> Option<IpAddr> {
     }
 }
 
-// Check if user agent is valid using a regex
-/*
-ua : String
-return : bool
-*/
+/// Check if user agent is valid using a regex, return true if valid
+/// else false.
+/// # Arguments
+/// * `ua` : String
+/// # Returns
+/// * `bool` - The boolean value.
 pub fn is_ua_valid(ua: &str) -> bool {
-    for keyword in BOT_UA_LIST.iter() {
-        if ua.contains(keyword) {
+    for ban_keyword in BOT_UA_LIST.iter() {
+        if ua.contains(ban_keyword) {
             return false;
         }
     }
@@ -124,13 +144,14 @@ pub fn is_ua_valid(ua: &str) -> bool {
     }
 }
 
-// Filter request using ip + useragent
-/*
-req : &HttpRequest
-return : Option<IpAddr>
-*/
-pub async fn request_filter(req: &HttpRequest) -> Option<IpAddr> {
-    if is_ua_valid(req.headers().get("User-Agent").unwrap().to_str().unwrap()) && valid_origin(req)
+/// Filter request using the ip and useragent.
+/// # Arguments
+/// * `req` : &HttpRequest
+/// # Return
+/// `Option<IpAddr>` : ip address of the client
+pub async fn request_filter(req: &HttpRequest, pool: &Pool) -> Option<IpAddr> {
+    if is_ua_valid(req.headers().get("User-Agent").unwrap().to_str().unwrap())
+        && valid_origin(req, pool).await
     {
         return get_ip(req);
     }
@@ -140,10 +161,12 @@ pub async fn request_filter(req: &HttpRequest) -> Option<IpAddr> {
 // Filter traffic flood by ip
 const CALLS_COUNT_QUERY: &str = r#"SELECT COUNT(*)::INT2 as count FROM omini_calls WHERE ip = $1 AND $2 - created_at < 60 LIMIT(51);"#;
 
-/*
-ip : IpAddr
-return : bool
-*/
+/// Check if the ip is flooding the server.
+/// If the ip is flooding the server, it returns false.
+/// If the ip is not flooding the server, it returns true.
+/// # Arguments
+/// `ip` : IpAddr
+/// `pool` : &Pool
 pub async fn prevent_flood(ip: IpAddr, pool: &Pool) -> Result<bool, String> {
     let time_now_in_sec = Utc::now().timestamp();
     let result = get_connection(pool)

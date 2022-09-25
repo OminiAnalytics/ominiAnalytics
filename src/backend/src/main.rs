@@ -3,7 +3,7 @@
  Created Date: 25 Aug 2022
  Author: realbacon
  -----
- Last Modified: 13/09/2022 09:24:39
+ Last Modified: 25/09/2022 01:53:0
  Modified By: realbacon
  -----
  License  : MIT
@@ -11,15 +11,27 @@
 */
 
 mod api;
+mod dashboard;
 use actix_cors::Cors;
+use actix_session::{config::PersistentSession, storage::CookieSessionStore, SessionMiddleware};
+use actix_web::cookie::{time, Key};
 use actix_web::{
     error, guard, http::header, middleware::Logger, web, App, HttpResponse, HttpServer,
 };
 use api::event::alive::endpoint::is_alive;
+use api::event::custom::endpoint::log_event;
 use api::main::endpoint::main_procedure_handler;
+pub mod errors;
+use dashboard::{
+    auth::login::{login, verify_session},
+    metrics::users::endpoint::connected,
+};
+use diesel::{pg::PgConnection, sql_query, sql_types::VarChar, Connection, RunQueryDsl};
+use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use dotenv::dotenv;
 use std::env;
 use tokio_postgres::NoTls;
+use uuid::Uuid;
 mod models;
 pub mod db {
     use deadpool_postgres::{Client, ManagerConfig, Pool, RecyclingMethod};
@@ -51,11 +63,37 @@ extern crate tokio;
 
 #[tokio::main(flavor = "multi_thread")]
 async fn main() -> std::io::Result<()> {
+    dotenv().ok();
+    let config = db::get_db_config();
+    // Init sessions
+    let secret_key = Key::generate();
+    // Run migrations and create default user
+    const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let conn = PgConnection::establish(&database_url);
+    match conn {
+        Ok(conn) => {
+            let mut conn = conn;
+            println!("Running migrations...");
+            conn.run_pending_migrations(MIGRATIONS).unwrap();
+            let create_default_user: Result<usize, diesel::result::Error> = sql_query(
+                "INSERT INTO omini_managers (id, name, password, status) VALUES ($1,'Administrator', encode(digest($2, 'sha256'),'hex'), 'admin') ON CONFLICT DO NOTHING;",
+            )
+            .bind::<diesel::sql_types::Uuid, _>(Uuid::new_v4())
+            .bind::<VarChar, _>(config.password.as_ref().unwrap())
+            .execute(&mut conn);
+            if create_default_user.is_err() {
+                println!("Failed to create default user...");
+            }
+        }
+        Err(e) => {
+            println!("Error: {}", e);
+        }
+    };
     std::env::set_var("RUST_LOG", "debug");
     std::env::set_var("RUST_BACKTRACE", "1");
-    dotenv().ok();
 
-    let pool = db::get_db_config().create_pool(None, NoTls).unwrap();
+    let pool = config.create_pool(None, NoTls).unwrap();
 
     env_logger::init();
 
@@ -73,12 +111,14 @@ async fn main() -> std::io::Result<()> {
             .allow_any_origin();
         App::new()
             .service(
-                web::scope("/api")
+                web::scope("")
                     .app_data(json_config)
                     .guard(guard::Header("content-type", "application/json"))
-                    .service(is_alive)
-                    .service(main_procedure_handler),
+                    .service(main_procedure_handler)
+                    .service(web::scope("/event").service(log_event).service(is_alive))
+                    .service(web::scope("/dsh").service(login).service(verify_session)),
             )
+            .service(web::scope("").service(web::scope("/dsh/metrics").service(connected)))
             .app_data(web::Data::new(pool.clone()))
             .app_data(web::JsonConfig::default().error_handler(|err, _| {
                 error::InternalError::from_response(
@@ -89,6 +129,14 @@ async fn main() -> std::io::Result<()> {
             }))
             .wrap(logger)
             .wrap(cors)
+            .wrap(
+                SessionMiddleware::builder(CookieSessionStore::default(), secret_key.clone())
+                    .session_lifecycle(
+                        PersistentSession::default().session_ttl(time::Duration::days(5)),
+                    )
+                    .cookie_name("sid".to_string())
+                    .build(),
+            )
     })
     .bind(env::var("SERVER_HOST").expect("SERVER_HOST not present in env"))?
     .run()
