@@ -3,7 +3,7 @@
  * Created Date: 24 Sep 2022
  * Author: realbacon
  * -----
- * Last Modified: 27/09/2022 12:51:9
+ * Last Modified: 27/09/2022 01:06:42
  * Modified By: realbacon
  * -----
  * License  : MIT
@@ -13,6 +13,7 @@
 /**
  * Verify is a cookie is present and valid
  * if not, redirect to login page
+ * @returns {Promise<boolean>} true if cookie is valid, false if not (always true on dev env)
  */
 export async function verifySession(): Promise<boolean> {
   if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
