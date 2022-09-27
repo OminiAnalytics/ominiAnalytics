@@ -3,7 +3,7 @@
  Created Date: 25 Sep 2022
  Author: realbacon
  -----
- Last Modified: 27/09/2022 03:09:0
+ Last Modified: 27/09/2022 03:18:22
  Modified By: realbacon
  -----
  License  : MIT
@@ -32,7 +32,7 @@ pub async fn connected(pool: Data<Pool>, session: Session) -> Result<HttpRespons
 }
 
 #[get("/total")]
-pub async fn total(pool: Data<Pool>, session: Session) -> Result<HttpResponse, HandlerError> {
+pub async fn total_users(pool: Data<Pool>, session: Session) -> Result<HttpResponse, HandlerError> {
     match verify_session(session) {
         false => return Err(HandlerError::Unauthorized),
         true => {}

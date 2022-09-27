@@ -3,7 +3,7 @@
  Created Date: 25 Aug 2022
  Author: realbacon
  -----
- Last Modified: 25/09/2022 01:53:0
+ Last Modified: 27/09/2022 03:18:15
  Modified By: realbacon
  -----
  License  : MIT
@@ -25,6 +25,7 @@ pub mod errors;
 use dashboard::{
     auth::login::{login, verify_session},
     metrics::users::endpoint::connected,
+    metrics::users::endpoint::total_users,
 };
 use diesel::{pg::PgConnection, sql_query, sql_types::VarChar, Connection, RunQueryDsl};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
@@ -118,7 +119,13 @@ async fn main() -> std::io::Result<()> {
                     .service(web::scope("/event").service(log_event).service(is_alive))
                     .service(web::scope("/dsh").service(login).service(verify_session)),
             )
-            .service(web::scope("").service(web::scope("/dsh/metrics").service(connected)))
+            .service(
+                web::scope("").service(
+                    web::scope("/dsh/metrics")
+                        .service(connected)
+                        .service(total_users),
+                ),
+            )
             .app_data(web::Data::new(pool.clone()))
             .app_data(web::JsonConfig::default().error_handler(|err, _| {
                 error::InternalError::from_response(
