@@ -3,7 +3,7 @@
  Created Date: 24 Sep 2022
  Author: realbacon
  -----
- Last Modified: 25/09/2022 02:17:10
+ Last Modified: 27/09/2022 03:25:39
  Modified By: realbacon
  -----
  License  : MIT
@@ -32,7 +32,10 @@ pub async fn login_handler(pool: &Pool, creds: &Creds) -> Result<Option<String>,
 pub fn verify_session(session: Session) -> bool {
     // TO-DO : Verify the uid
     match session.get::<String>("uid") {
-        Ok(_) => true,
+        Ok(opt) => match opt {
+            Some(_) => true,
+            None => false,
+        },
         Err(_) => false,
     }
 }
