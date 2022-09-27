@@ -3,7 +3,7 @@
  Created Date: 25 Aug 2022
  Author: realbacon
  -----
- Last Modified: 27/09/2022 03:52:33
+ Last Modified: 27/09/2022 04:23:13
  Modified By: realbacon
  -----
  License  : MIT
@@ -24,6 +24,7 @@ use api::main::endpoint::main_procedure_handler;
 pub mod errors;
 use dashboard::{
     auth::login::{login, verify_session},
+    events::endpoint::create_event,
     metrics::users::endpoint::{active_users, connected, total_users},
 };
 use diesel::{pg::PgConnection, sql_query, sql_types::VarChar, Connection, RunQueryDsl};
@@ -116,7 +117,12 @@ async fn main() -> std::io::Result<()> {
                     .guard(guard::Header("content-type", "application/json"))
                     .service(main_procedure_handler)
                     .service(web::scope("/event").service(log_event).service(is_alive))
-                    .service(web::scope("/dsh").service(login).service(verify_session)),
+                    .service(
+                        web::scope("/dsh")
+                            .service(login)
+                            .service(verify_session)
+                            .service(web::scope("/event").service(create_event)),
+                    ),
             )
             .service(
                 web::scope("").service(

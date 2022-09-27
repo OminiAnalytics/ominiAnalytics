@@ -3,7 +3,7 @@
  Created Date: 24 Sep 2022
  Author: realbacon
  -----
- Last Modified: 27/09/2022 03:25:39
+ Last Modified: 27/09/2022 05:45:32
  Modified By: realbacon
  -----
  License  : MIT
@@ -29,13 +29,13 @@ pub async fn login_handler(pool: &Pool, creds: &Creds) -> Result<Option<String>,
     }
 }
 
-pub fn verify_session(session: Session) -> bool {
+pub fn verify_session(session: Session) -> Result<String, ()> {
     // TO-DO : Verify the uid
     match session.get::<String>("uid") {
         Ok(opt) => match opt {
-            Some(_) => true,
-            None => false,
+            Some(id) => Ok(id),
+            None => Err(()),
         },
-        Err(_) => false,
+        Err(_) => Err(()),
     }
 }
