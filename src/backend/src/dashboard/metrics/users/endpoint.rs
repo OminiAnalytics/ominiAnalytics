@@ -3,14 +3,14 @@
  Created Date: 25 Sep 2022
  Author: realbacon
  -----
- Last Modified: 25/09/2022 02:22:51
+ Last Modified: 27/09/2022 03:09:0
  Modified By: realbacon
  -----
  License  : MIT
  -----
 */
 
-use super::handlers::get_connected_users;
+use super::handlers::{get_connected_users, get_total_users};
 use super::structs::ConnectedUsers;
 use crate::errors::HandlerError::DBError;
 use crate::{dashboard::auth::handlers::verify_session, errors::HandlerError};
@@ -25,6 +25,19 @@ pub async fn connected(pool: Data<Pool>, session: Session) -> Result<HttpRespons
         true => {}
     };
     let request = get_connected_users(&pool);
+    match request.await {
+        Ok(res) => Ok(HttpResponse::Ok().json(ConnectedUsers { count: res })),
+        Err(_) => Err(DBError),
+    }
+}
+
+#[get("/total")]
+pub async fn total(pool: Data<Pool>, session: Session) -> Result<HttpResponse, HandlerError> {
+    match verify_session(session) {
+        false => return Err(HandlerError::Unauthorized),
+        true => {}
+    };
+    let request = get_total_users(&pool);
     match request.await {
         Ok(res) => Ok(HttpResponse::Ok().json(ConnectedUsers { count: res })),
         Err(_) => Err(DBError),
