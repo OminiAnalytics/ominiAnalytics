@@ -3,7 +3,7 @@
  Created Date: 25 Sep 2022
  Author: realbacon
  -----
- Last Modified: 27/09/2022 03:45:14
+ Last Modified: 27/09/2022 03:55:9
  Modified By: realbacon
  -----
  License  : MIT
@@ -44,17 +44,18 @@ pub async fn total_users(pool: Data<Pool>, session: Session) -> Result<HttpRespo
     }
 }
 
-#[get("/active/{time}")]
+#[get("/active/{time}/{to}")]
 pub async fn active_users(
     pool: Data<Pool>,
     session: Session,
-    time: Path<i64>,
+    from: Path<i64>,
+    to: Path<i64>,
 ) -> Result<HttpResponse, HandlerError> {
     match verify_session(session) {
         false => return Err(HandlerError::Unauthorized),
         true => {}
     };
-    let request = get_active_users_since(&pool, time.into_inner());
+    let request = get_active_users_since(&pool, from.into_inner(), to.into_inner());
     match request.await {
         Ok(res) => Ok(HttpResponse::Ok().json(CountStruct { count: res })),
         Err(_) => Err(DBError),
