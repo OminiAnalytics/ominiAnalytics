@@ -3,7 +3,7 @@
  Created Date: 25 Sep 2022
  Author: realbacon
  -----
- Last Modified: 25/09/2022 02:22:4
+ Last Modified: 27/09/2022 03:41:59
  Modified By: realbacon
  -----
  License  : MIT
@@ -13,6 +13,6 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
-pub struct ConnectedUsers {
+pub struct CountStruct {
     pub count: i64,
 }

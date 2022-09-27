@@ -3,7 +3,7 @@
  Created Date: 25 Aug 2022
  Author: realbacon
  -----
- Last Modified: 27/09/2022 03:18:15
+ Last Modified: 27/09/2022 03:52:33
  Modified By: realbacon
  -----
  License  : MIT
@@ -24,8 +24,7 @@ use api::main::endpoint::main_procedure_handler;
 pub mod errors;
 use dashboard::{
     auth::login::{login, verify_session},
-    metrics::users::endpoint::connected,
-    metrics::users::endpoint::total_users,
+    metrics::users::endpoint::{active_users, connected, total_users},
 };
 use diesel::{pg::PgConnection, sql_query, sql_types::VarChar, Connection, RunQueryDsl};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
@@ -123,7 +122,8 @@ async fn main() -> std::io::Result<()> {
                 web::scope("").service(
                     web::scope("/dsh/metrics")
                         .service(connected)
-                        .service(total_users),
+                        .service(total_users)
+                        .service(active_users),
                 ),
             )
             .app_data(web::Data::new(pool.clone()))
