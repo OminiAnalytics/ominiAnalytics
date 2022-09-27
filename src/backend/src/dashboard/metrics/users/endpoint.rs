@@ -3,7 +3,7 @@
  Created Date: 25 Sep 2022
  Author: realbacon
  -----
- Last Modified: 27/09/2022 03:55:9
+ Last Modified: 27/09/2022 05:50:4
  Modified By: realbacon
  -----
  License  : MIT
@@ -21,8 +21,8 @@ use deadpool_postgres::Pool;
 #[get("/connected")]
 pub async fn connected(pool: Data<Pool>, session: Session) -> Result<HttpResponse, HandlerError> {
     match verify_session(session) {
-        false => return Err(HandlerError::Unauthorized),
-        true => {}
+        Err(_) => return Err(HandlerError::Unauthorized),
+        Ok(_) => {}
     };
     let request = get_connected_users(&pool);
     match request.await {
@@ -34,8 +34,8 @@ pub async fn connected(pool: Data<Pool>, session: Session) -> Result<HttpRespons
 #[get("/total")]
 pub async fn total_users(pool: Data<Pool>, session: Session) -> Result<HttpResponse, HandlerError> {
     match verify_session(session) {
-        false => return Err(HandlerError::Unauthorized),
-        true => {}
+        Err(_) => return Err(HandlerError::Unauthorized),
+        Ok(_) => {}
     };
     let request = get_total_users(&pool);
     match request.await {
@@ -52,8 +52,8 @@ pub async fn active_users(
     to: Path<i64>,
 ) -> Result<HttpResponse, HandlerError> {
     match verify_session(session) {
-        false => return Err(HandlerError::Unauthorized),
-        true => {}
+        Err(_) => return Err(HandlerError::Unauthorized),
+        Ok(_) => {}
     };
     let request = get_active_users_since(&pool, from.into_inner(), to.into_inner());
     match request.await {
